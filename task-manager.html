@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Velocity Task Manager</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .header {
+            background-color: #2d5a2d;
+            color: white;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .header-left p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .header-right {
+            text-align: right;
+        }
+
+        .brand-nav {
+            background-color: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 12px 24px;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .brand-btn {
+            padding: 8px 16px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .brand-btn:hover {
+            border-color: #999;
+        }
+
+        .brand-btn.active {
+            border-color: #7c3aed;
+            background-color: #f3f0ff;
+            color: #7c3aed;
+        }
+
+        .filters-section {
+            background-color: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 16px 24px;
+        }
+
+        .filter-group {
+            margin-bottom: 12px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: #334155;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .filter-btn {
+            padding: 6px 12px;
+            border: 1px solid #cbd5e1;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            border-color: #999;
+        }
+
+        .filter-btn.active {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .filter-btn.status-in-progress {
+            border-color: #3b82f6;
+        }
+
+        .filter-btn.status-in-progress.active {
+            background-color: #3b82f6;
+        }
+
+        .filter-btn.status-pending {
+            border-color: #f97316;
+        }
+
+        .filter-btn.status-pending.active {
+            background-color: #f97316;
+        }
+
+        .filter-btn.status-complete {
+            border-color: #10b981;
+        }
+
+        .filter-btn.status-complete.active {
+            background-color: #10b981;
+        }
+
+        .filter-btn.status-on-hold {
+            border-color: #6b7280;
+        }
+
+        .filter-btn.status-on-hold.active {
+            background-color: #6b7280;
+        }
+
+        .filter-btn.status-info {
+            border-color: #a78bfa;
+        }
+
+        .filter-btn.status-info.active {
+            background-color: #a78bfa;
+        }
+
+        .clear-btn {
+            padding: 6px 12px;
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .controls {
+            background-color: white;
+            padding: 16px 24px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            padding: 8px 16px;
+            background-color: #22863a;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: #1a6028;
+        }
+
+        .table-container {
+            background-color: white;
+            padding: 16px 24px;
+            margin: 0 24px 24px 24px;
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        thead {
+            background-color: #f0f1f3;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #334155;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+
+        td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tbody tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-in-progress {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-pending {
+            background-color: #fed7aa;
+            color: #92400e;
+        }
+
+        .status-complete {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .status-on-hold {
+            background-color: #e5e7eb;
+            color: #374151;
+        }
+
+        .status-info {
+            background-color: #ede9fe;
+            color: #5b21b6;
+        }
+
+        .priority-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .priority-high {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .priority-medium {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .priority-low {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            border: none;
+            background-color: #f0f0f0;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 12px;
+            transition: background-color 0.2s;
+        }
+
+        .btn-sm:hover {
+            background-color: #e0e0e0;
+        }
+
+        .btn-delete {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .btn-delete:hover {
+            background-color: #fecaca;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal h2 {
+            margin-bottom: 16px;
+            font-size: 18px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 13px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+
+        .btn-secondary {
+            padding: 8px 16px;
+            background-color: #e5e7eb;
+            color: #374151;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 13px;
+        }
+
+        .btn-secondary:hover {
+            background-color: #d1d5db;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: #999;
+        }
+
+        .email-modal {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .email-modal h2 {
+            margin-bottom: 12px;
+            font-size: 18px;
+        }
+
+        .email-preview {
+            background-color: #f9fafb;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 16px;
+            margin: 16px 0;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 13px;
+            line-height: 1.5;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .copy-btn {
+            padding: 8px 16px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 13px;
+            transition: background-color 0.2s;
+            margin-right: 8px;
+        }
+
+        .copy-btn:hover {
+            background-color: #2563eb;
+        }
+
+        .copy-btn.copied {
+            background-color: #10b981;
+        }
+
+        .email-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            justify-content: flex-end;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function TaskManager() {
+            const clients = ['World Wide Snacks', 'Sunrise Organics', 'Cerebelly', 'Premier Foods'];
+            const owners = ['Scott Gilroy', 'Rob Levit', 'Jen Wagoner', 'Denise Chmielewski', 'Dustin Anderson', 'Ken Sorensen', 'Ashley Jones', 'Carrie Ellis', 'Brooke Jones', 'Adam Levit', 'John Salce'];
+            const statuses = ['In Progress', 'Pending', 'Complete', 'On Hold', 'Info/Update'];
+            const priorities = ['High', 'Medium', 'Low'];
+
+            const [tasks, setTasks] = useState([]);
+            const [selectedClient, setSelectedClient] = useState('All Clients');
+            const [selectedStatuses, setSelectedStatuses] = useState([]);
+            const [selectedPriorities, setSelectedPriorities] = useState([]);
+            const [selectedOwners, setSelectedOwners] = useState([]);
+            const [searchTerm, setSearchTerm] = useState('');
+            const [showModal, setShowModal] = useState(false);
+            const [showEmailModal, setShowEmailModal] = useState(false);
+            const [emailTask, setEmailTask] = useState(null);
+            const [copiedEmail, setCopiedEmail] = useState(false);
+            const [editingTask, setEditingTask] = useState(null);
+            const [formData, setFormData] = useState({
+                category: '',
+                task: '',
+                owner: '',
+                dueDate: '',
+                status: 'In Progress',
+                priority: 'Medium',
+                notes: ''
+            });
+
+            // Load tasks from localStorage on mount
+            useEffect(() => {
+                const saved = localStorage.getItem('velocityTasks');
+                if (saved) {
+                    setTasks(JSON.parse(saved));
+                }
+            }, []);
+
+            // Save tasks to localStorage whenever they change
+            useEffect(() => {
+                localStorage.setItem('velocityTasks', JSON.stringify(tasks));
+            }, [tasks]);
+
+            // Filter tasks
+            const filteredTasks = tasks.filter(task => {
+                const matchClient = selectedClient === 'All Clients' || task.client === selectedClient;
+                const matchStatus = selectedStatuses.length === 0 || selectedStatuses.includes(task.status);
+                const matchPriority = selectedPriorities.length === 0 || selectedPriorities.includes(task.priority);
+                const matchOwner = selectedOwners.length === 0 || selectedOwners.includes(task.owner);
+                const matchSearch = task.task.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                   task.notes.toLowerCase().includes(searchTerm.toLowerCase());
+
+                return matchClient && matchStatus && matchPriority && matchOwner && matchSearch;
+            });
+
+            const handleAddTask = () => {
+                setFormData({
+                    category: '',
+                    task: '',
+                    owner: '',
+                    dueDate: '',
+                    status: 'In Progress',
+                    priority: 'Medium',
+                    notes: ''
+                });
+                setEditingTask(null);
+                setShowModal(true);
+            };
+
+            const handleEditTask = (task) => {
+                setEditingTask(task.id);
+                setFormData(task);
+                setShowModal(true);
+            };
+
+            const handleSaveTask = () => {
+                if (!formData.task || !formData.owner || !formData.dueDate || !formData.category) {
+                    alert('Please fill in all required fields');
+                    return;
+                }
+
+                if (editingTask) {
+                    setTasks(tasks.map(t => t.id === editingTask ? { ...formData, id: editingTask, client: selectedClient } : t));
+                } else {
+                    setTasks([...tasks, { ...formData, id: Date.now(), client: selectedClient }]);
+                }
+                setShowModal(false);
+            };
+
+            const handleDeleteTask = (id) => {
+                if (confirm('Are you sure you want to delete this task?')) {
+                    setTasks(tasks.filter(t => t.id !== id));
+                }
+            };
+
+            const handleExportEmail = (task) => {
+                setEmailTask(task);
+                setShowEmailModal(true);
+                setCopiedEmail(false);
+            };
+
+            const generateEmailContent = (task) => {
+                const dueDateFormatted = new Date(task.dueDate + 'T00:00:00').toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                const email = `SUBJECT: Follow-up: ${task.task}
+
+Hi ${task.owner.split(' ')[0]},
+
+I wanted to follow up on our recent meeting regarding ${task.client}.
+
+KEY POINTS:
+${task.notes.split('\n').map(line => line.trim()).filter(line => line).map(line => `- ${line}`).join('\n') || `- ${task.task}`}
+
+DEADLINE: ${dueDateFormatted}
+
+Please let me know if you have any questions or if there's anything else I can help you with.
+
+Best regards,
+John Salce
+Velocity Sales & Marketing
+john.salce@velocitysalesmanagement.net`;
+
+                return email;
+            };
+
+            const copyEmailToClipboard = () => {
+                const emailContent = generateEmailContent(emailTask);
+                navigator.clipboard.writeText(emailContent).then(() => {
+                    setCopiedEmail(true);
+                    setTimeout(() => setCopiedEmail(false), 2000);
+                });
+            };
+
+            const toggleStatusFilter = (status) => {
+                setSelectedStatuses(prev =>
+                    prev.includes(status) ? prev.filter(s => s !== status) : [...prev, status]
+                );
+            };
+
+            const togglePriorityFilter = (priority) => {
+                setSelectedPriorities(prev =>
+                    prev.includes(priority) ? prev.filter(p => p !== priority) : [...prev, priority]
+                );
+            };
+
+            const toggleOwnerFilter = (owner) => {
+                setSelectedOwners(prev =>
+                    prev.includes(owner) ? prev.filter(o => o !== owner) : [...prev, owner]
+                );
+            };
+
+            const clearFilters = () => {
+                setSelectedStatuses([]);
+                setSelectedPriorities([]);
+                setSelectedOwners([]);
+                setSearchTerm('');
+            };
+
+            const getStatusClass = (status) => {
+                return status.toLowerCase().replace(/\s+/g, '-').replace('/', '');
+            };
+
+            const getPriorityClass = (priority) => {
+                return priority.toLowerCase();
+            };
+
+            return (
+                <div>
+                    <div className="header">
+                        <div className="header-left">
+                            <h1>Velocity Task Manager</h1>
+                            <p>Velocity Sales & Marketing — Live Tasks</p>
+                        </div>
+                        <div className="header-right">
+                            <p>john.salce@velocitysalesmanagement.net</p>
+                        </div>
+                    </div>
+
+                    <div className="brand-nav">
+                        <button
+                            className={`brand-btn ${selectedClient === 'All Clients' ? 'active' : ''}`}
+                            onClick={() => setSelectedClient('All Clients')}
+                        >
+                            All Clients
+                        </button>
+                        {clients.map(client => (
+                            <button
+                                key={client}
+                                className={`brand-btn ${selectedClient === client ? 'active' : ''}`}
+                                onClick={() => setSelectedClient(client)}
+                            >
+                                {client}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="filters-section">
+                        <div className="filter-group">
+                            <span className="filter-label">STATUS</span>
+                            {statuses.map(status => (
+                                <button
+                                    key={status}
+                                    className={`filter-btn status-${getStatusClass(status)} ${selectedStatuses.includes(status) ? 'active' : ''}`}
+                                    onClick={() => toggleStatusFilter(status)}
+                                >
+                                    {status}
+                                </button>
+                            ))}
+                            {(selectedStatuses.length > 0 || selectedPriorities.length > 0 || selectedOwners.length > 0) && (
+                                <button className="clear-btn" onClick={clearFilters}>Clear</button>
+                            )}
+                        </div>
+
+                        <div className="filter-group">
+                            <span className="filter-label">PRIORITY</span>
+                            {priorities.map(priority => (
+                                <button
+                                    key={priority}
+                                    className={`filter-btn ${selectedPriorities.includes(priority) ? 'active' : ''}`}
+                                    onClick={() => togglePriorityFilter(priority)}
+                                >
+                                    {priority}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="filter-group">
+                            <span className="filter-label">OWNER</span>
+                            {owners.map(owner => (
+                                <button
+                                    key={owner}
+                                    className={`filter-btn ${selectedOwners.includes(owner) ? 'active' : ''}`}
+                                    onClick={() => toggleOwnerFilter(owner)}
+                                >
+                                    {owner.split(' ')[0]}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="controls">
+                        <input
+                            type="text"
+                            className="search-box"
+                            placeholder="Search tasks..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        <button className="btn-primary" onClick={handleAddTask}>+ New Task</button>
+                    </div>
+
+                    <div className="table-container">
+                        {filteredTasks.length === 0 ? (
+                            <div className="empty-state">
+                                <p>No tasks found. Try adjusting your filters or create a new task.</p>
+                            </div>
+                        ) : (
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>CATEGORY</th>
+                                        <th>TASK</th>
+                                        <th>OWNER</th>
+                                        <th>DUE DATE</th>
+                                        <th>STATUS</th>
+                                        <th>PRIORITY</th>
+                                        <th>NOTES</th>
+                                        <th>ACTIONS</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredTasks.map(task => (
+                                        <tr key={task.id}>
+                                            <td>{task.category}</td>
+                                            <td>{task.task}</td>
+                                            <td>{task.owner}</td>
+                                            <td>{task.dueDate}</td>
+                                            <td><span className={`status-badge status-${getStatusClass(task.status)}`}>{task.status}</span></td>
+                                            <td><span className={`priority-badge priority-${getPriorityClass(task.priority)}`}>{task.priority}</span></td>
+                                            <td>{task.notes.substring(0, 50)}{task.notes.length > 50 ? '...' : ''}</td>
+                                            <td>
+                                                <div className="action-btns">
+                                                    <button className="btn-sm" onClick={() => handleExportEmail(task)}>Email</button>
+                                                    <button className="btn-sm" onClick={() => handleEditTask(task)}>Edit</button>
+                                                    <button className="btn-sm btn-delete" onClick={() => handleDeleteTask(task.id)}>Delete</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
+                    </div>
+
+                    {showModal && (
+                        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+                            <div className="modal" onClick={(e) => e.stopPropagation()}>
+                                <h2>{editingTask ? 'Edit Task' : 'New Task'}</h2>
+
+                                <div className="form-group">
+                                    <label>Category *</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g., Proposal, Follow-up, Contract"
+                                        value={formData.category}
+                                        onChange={(e) => setFormData({...formData, category: e.target.value})}
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Task *</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Describe the task"
+                                        value={formData.task}
+                                        onChange={(e) => setFormData({...formData, task: e.target.value})}
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Owner *</label>
+                                    <select
+                                        value={formData.owner}
+                                        onChange={(e) => setFormData({...formData, owner: e.target.value})}
+                                    >
+                                        <option value="">Select an owner</option>
+                                        {owners.map(owner => (
+                                            <option key={owner} value={owner}>{owner}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Due Date *</label>
+                                    <input
+                                        type="date"
+                                        value={formData.dueDate}
+                                        onChange={(e) => setFormData({...formData, dueDate: e.target.value})}
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Status</label>
+                                    <select
+                                        value={formData.status}
+                                        onChange={(e) => setFormData({...formData, status: e.target.value})}
+                                    >
+                                        {statuses.map(status => (
+                                            <option key={status} value={status}>{status}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Priority</label>
+                                    <select
+                                        value={formData.priority}
+                                        onChange={(e) => setFormData({...formData, priority: e.target.value})}
+                                    >
+                                        {priorities.map(priority => (
+                                            <option key={priority} value={priority}>{priority}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Notes</label>
+                                    <textarea
+                                        placeholder="Add any additional notes"
+                                        value={formData.notes}
+                                        onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                                    />
+                                </div>
+
+                                <div className="modal-buttons">
+                                    <button className="btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
+                                    <button className="btn-primary" onClick={handleSaveTask}>Save Task</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {showEmailModal && emailTask && (
+                        <div className="modal-overlay" onClick={() => setShowEmailModal(false)}>
+                            <div className="email-modal" onClick={(e) => e.stopPropagation()}>
+                                <h2>Follow-up Email Draft</h2>
+                                <p style={{ fontSize: '12px', color: '#666', marginBottom: '12px' }}>Copy the text below and paste into your email client:</p>
+
+                                <div className="email-preview">
+                                    {generateEmailContent(emailTask)}
+                                </div>
+
+                                <div className="email-buttons">
+                                    <button
+                                        className={`copy-btn ${copiedEmail ? 'copied' : ''}`}
+                                        onClick={copyEmailToClipboard}
+                                    >
+                                        {copiedEmail ? '✓ Copied' : 'Copy Email'}
+                                    </button>
+                                    <button className="btn-secondary" onClick={() => setShowEmailModal(false)}>Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<TaskManager />, document.getElementById('root'));
+    </script>
+</body>
+</html>
