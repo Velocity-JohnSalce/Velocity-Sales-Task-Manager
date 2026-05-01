@@ -744,7 +744,7 @@ Date: ${today}`;
                                     key={client}
                                     data-client={client}
                                     className={`client-btn ${selectedClient === client ? 'active' : ''}`}
-                                    onClick={() => setSelectedClient(client)}
+                                    onClick={() => { setSelectedClient(client); setSelectedSupplierOwners([]); }}
                                 >
                                     {client}
                                 </button>
@@ -848,7 +848,7 @@ Date: ${today}`;
                             <div className="filter-group">
                                 <div className="filter-label">Client Owner</div>
                                 <div className="filter-options">
-                                    {SUPPLIER_OWNERS.map(supplierOwner => (
+                                    {(selectedClient !== 'All Clients' ? getSupplierOwnersForClient(selectedClient) : SUPPLIER_OWNERS).map(supplierOwner => (
                                         <button
                                             key={supplierOwner}
                                             data-filter-type="supplier-owner"
