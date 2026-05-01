@@ -9,1124 +9,329 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-            background-color: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-color: #f0f2f5;
         }
-
         .header {
-            background-color: #2d5a2d;
+            background: linear-gradient(135deg, #1a3a1a 0%, #2d5a2d 60%, #3d7a3d 100%);
             color: white;
-            padding: 16px 24px;
+            padding: 16px 28px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 4px solid #5cb85c;
+            box-shadow: 0 3px 16px rgba(0,0,0,0.3);
         }
-
-        .header-left h1 {
-            font-size: 22px;
-            font-weight: 600;
-            margin-bottom: 2px;
-        }
-
-        .header-left p {
+        .header-left { display: flex; align-items: center; gap: 14px; }
+        .header-logo { font-size: 34px; line-height: 1; }
+        .header-title-group h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.3px; margin-bottom: 2px; }
+        .header-title-group p { font-size: 13px; opacity: 0.8; }
+        .header-badge {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 20px;
+            padding: 5px 13px;
             font-size: 13px;
-            opacity: 0.9;
-        }
-
-        .header-right {
+            font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 7px;
         }
-
-        .header-email {
-            font-size: 13px;
+        .header-badge-dot {
+            width: 8px; height: 8px;
+            background: #7dda7d;
+            border-radius: 50%;
+            box-shadow: 0 0 7px #7dda7d;
+            animation: livepulse 2s infinite;
         }
-
+        @keyframes livepulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+        .header-right { display: flex; align-items: center; gap: 14px; }
+        .header-email { font-size: 13px; opacity: 0.8; }
         .sign-out-btn {
-            padding: 8px 16px;
-            background: white;
-            color: #2d5a2d;
-            border: none;
-            border-radius: 4px;
+            padding: 7px 16px;
+            background: rgba(255,255,255,0.12);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 20px;
             cursor: pointer;
             font-size: 13px;
             font-weight: 500;
+            transition: all 0.2s;
         }
-
-        .sign-out-btn:hover {
-            background: #f0f0f0;
-        }
-
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 24px;
-        }
-
-        .client-nav {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-        }
-
+        .sign-out-btn:hover { background: rgba(255,255,255,0.25); }
+        .container { max-width: 1700px; margin: 0 auto; padding: 20px 24px; }
+        .client-nav { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
         .client-btn {
-            padding: 10px 18px;
+            padding: 10px 20px;
             border: 2px solid #ddd;
             background: white;
             cursor: pointer;
-            border-radius: 20px;
+            border-radius: 10px;
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             transition: all 0.2s;
-            color: #333;
+            color: #555;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            min-width: 110px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
         }
-
-        .client-btn:hover {
-            border-color: #999;
-        }
-
-        /* Client Colors - Unselected */
-        .client-btn[data-client="All Clients"] {
-            color: #dc2626;
-        }
-
-        .client-btn[data-client="World Wide Snacks"] {
-            color: #2563eb;
-        }
-
-        .client-btn[data-client="Sunrise Organics"] {
-            color: #eab308;
-        }
-
-        .client-btn[data-client="Cerebelly"] {
-            color: #ec4899;
-        }
-
-        .client-btn[data-client="Premier Foods"] {
-            color: #ea580c;
-        }
-
-        /* Client Colors - Selected */
-        .client-btn.active[data-client="All Clients"] {
-            border-color: #dc2626;
-            background-color: #dc2626;
-            color: #000;
-        }
-
-        .client-btn.active[data-client="World Wide Snacks"] {
-            border-color: #2563eb;
-            background-color: #2563eb;
-            color: #000;
-        }
-
-        .client-btn.active[data-client="Sunrise Organics"] {
-            border-color: #eab308;
-            background-color: #eab308;
-            color: #000;
-        }
-
-        .client-btn.active[data-client="Cerebelly"] {
-            border-color: #ec4899;
-            background-color: #ec4899;
-            color: #000;
-        }
-
-        .client-btn.active[data-client="Premier Foods"] {
-            border-color: #ea580c;
-            background-color: #ea580c;
-            color: #000;
-        }
-
+        .client-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+        .client-btn-count { font-size: 11px; font-weight: 500; opacity: 0.7; }
+        .client-btn[data-client="All Clients"] { color: #dc2626; border-color: #fca5a5; }
+        .client-btn[data-client="World Wide Snacks"] { color: #2563eb; border-color: #bfdbfe; }
+        .client-btn[data-client="Sunrise Organics"] { color: #ca8a04; border-color: #fde68a; }
+        .client-btn[data-client="Cerebelly"] { color: #db2777; border-color: #fbcfe8; }
+        .client-btn[data-client="Premier Foods"] { color: #ea580c; border-color: #fed7aa; }
+        .client-btn.active[data-client="All Clients"] { background:#dc2626; border-color:#dc2626; color:white; box-shadow:0 4px 14px rgba(220,38,38,0.35); }
+        .client-btn.active[data-client="World Wide Snacks"] { background:#2563eb; border-color:#2563eb; color:white; box-shadow:0 4px 14px rgba(37,99,235,0.35); }
+        .client-btn.active[data-client="Sunrise Organics"] { background:#ca8a04; border-color:#ca8a04; color:white; box-shadow:0 4px 14px rgba(202,138,4,0.35); }
+        .client-btn.active[data-client="Cerebelly"] { background:#db2777; border-color:#db2777; color:white; box-shadow:0 4px 14px rgba(219,39,119,0.35); }
+        .client-btn.active[data-client="Premier Foods"] { background:#ea580c; border-color:#ea580c; color:white; box-shadow:0 4px 14px rgba(234,88,12,0.35); }
+        .client-btn.active .client-btn-count { opacity: 0.9; }
         .filters-section {
             background: white;
-            padding: 0;
-            border-radius: 0;
-            margin-bottom: 24px;
-            box-shadow: none;
-            border-bottom: 1px solid #e0e0e0;
+            border-radius: 12px;
+            margin-bottom: 18px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+            border: 1px solid #e8e8e8;
+            overflow: hidden;
         }
-
+        .filters-toggle-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 18px;
+            cursor: pointer;
+            background: white;
+            transition: background 0.15s;
+            user-select: none;
+        }
+        .filters-toggle-bar:hover { background: #f9f9f9; }
+        .filters-toggle-left { display: flex; align-items: center; gap: 10px; }
+        .filters-toggle-label { font-size: 13px; font-weight: 700; color: #444; text-transform: uppercase; letter-spacing: 0.6px; }
+        .filters-active-dots { display: flex; gap: 5px; align-items: center; }
+        .filters-active-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .filters-toggle-arrow { font-size: 12px; color: #999; transition: transform 0.2s; display: inline-block; }
+        .filters-toggle-arrow.open { transform: rotate(180deg); }
+        .filters-body { border-top: 1px solid #f0f0f0; }
         .filter-group {
-            padding: 16px 0;
-            margin: 0;
-            border-bottom: 1px solid #e0e0e0;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .filter-group:last-child {
-            border-bottom: none;
-            padding-bottom: 16px;
-        }
-
-        .filter-label {
-            font-size: 12px;
-            font-weight: 700;
-            color: #333;
-            text-transform: uppercase;
-            min-width: 70px;
-            letter-spacing: 0.5px;
-        }
-
-        .filter-options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            flex: 1;
-            align-items: center;
-        }
-
-        .filter-btn {
-            padding: 8px 16px;
-            border: 2px solid #ddd;
-            background: white;
-            cursor: pointer;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 500;
-            transition: all 0.2s;
-            color: #333;
-        }
-
-        .filter-btn:hover {
-            border-color: #999;
-        }
-
-        .filter-btn.active {
-            font-weight: 600;
-            color: #000;
-            border: 2px solid;
-        }
-
-        /* Status Colors - Unselected */
-        .filter-btn[data-filter-type="status"][data-status="In Progress"] {
-            color: #2563eb;
-        }
-
-        .filter-btn[data-filter-type="status"][data-status="Pending"] {
-            color: #ea580c;
-        }
-
-        .filter-btn[data-filter-type="status"][data-status="Complete"] {
-            color: #16a34a;
-        }
-
-        .filter-btn[data-filter-type="status"][data-status="On Hold"] {
-            color: #6b7280;
-        }
-
-        .filter-btn[data-filter-type="status"][data-status="Info/Update"] {
-            color: #7c3aed;
-        }
-
-        /* Status Colors - Selected */
-        .filter-btn.active[data-filter-type="status"][data-status="In Progress"] {
-            background-color: #2563eb;
-            border-color: #2563eb;
-            color: #000;
-        }
-
-        .filter-btn.active[data-filter-type="status"][data-status="Pending"] {
-            background-color: #ea580c;
-            border-color: #ea580c;
-            color: #000;
-        }
-
-        .filter-btn.active[data-filter-type="status"][data-status="Complete"] {
-            background-color: #16a34a;
-            border-color: #16a34a;
-            color: #000;
-        }
-
-        .filter-btn.active[data-filter-type="status"][data-status="On Hold"] {
-            background-color: #6b7280;
-            border-color: #6b7280;
-            color: #000;
-        }
-
-        .filter-btn.active[data-filter-type="status"][data-status="Info/Update"] {
-            background-color: #7c3aed;
-            border-color: #7c3aed;
-            color: #000;
-        }
-
-        /* Priority Colors - Unselected */
-        .filter-btn[data-filter-type="priority"][data-priority="High"] {
-            color: #dc2626;
-        }
-
-        .filter-btn[data-filter-type="priority"][data-priority="Medium"] {
-            color: #f59e0b;
-        }
-
-        .filter-btn[data-filter-type="priority"][data-priority="Low"] {
-            color: #22c55e;
-        }
-
-        /* Priority Colors - Selected */
-        .filter-btn.active[data-filter-type="priority"][data-priority="High"] {
-            background-color: #dc2626;
-            border-color: #dc2626;
-            color: #000;
-        }
-
-        .filter-btn.active[data-filter-type="priority"][data-priority="Medium"] {
-            background-color: #f59e0b;
-            border-color: #f59e0b;
-            color: #000;
-        }
-
-        .filter-btn.active[data-filter-type="priority"][data-priority="Low"] {
-            background-color: #22c55e;
-            border-color: #22c55e;
-            color: #000;
-        }
-
-        /* Owner Colors - Unselected */
-        .filter-btn[data-filter-type="owner"][data-owner="Scott Gilroy"] {
-            color: #2563eb;
-        }
-
-        .filter-btn[data-filter-type="owner"][data-owner="Rob Levit"] {
-            color: #dc2626;
-        }
-
-        .filter-btn[data-filter-type="owner"][data-owner="Jen Wagoner"] {
-            color: #ec4899;
-        }
-
-        .filter-btn[data-filter-type="owner"][data-owner="Denise Chmielewski"] {
-            color: #ea580c;
-        }
-
-        .filter-btn[data-filter-type="owner"][data-owner="Dustin Anderson"] {
-            color: #6366f1;
-        }
-
-        .filter-btn[data-filter-type="owner"][data-owner="Ken Sorensen"] {
-            color: #7c3aed;
-        }
-
-        .filter-btn[data-filter-type="owner"][data-owner="Ashley Jones"] {
-            color: #f59e0b;
-        }
-
-        .filter-btn[data-filter-type="owner"][data-owner="Carrie Ellis"] {
-            color: #06b6d4;
-        }
-
-        .filter-btn[data-filter-type="owner"][data-owner="Brooke Jones"] {
-            color: #8b5cf6;
-        }
-
-        .filter-btn[data-filter-type="owner"][data-owner="Adam Levit"] {
-            color: #d97706;
-        }
-
-        .filter-btn[data-filter-type="owner"][data-owner="John Salce"] {
-            color: #f97316;
-        }
-
-        /* Supplier Owner Colors - Unselected */
-        .filter-btn[data-filter-type="supplier-owner"][data-supplier-owner="Danny Pollak"] {
-            color: #2563eb;
-        }
-
-        .filter-btn[data-filter-type="supplier-owner"][data-supplier-owner="Erin Bellavance"] {
-            color: #eab308;
-        }
-
-        .filter-btn[data-filter-type="supplier-owner"][data-supplier-owner="Hannah Deupree"] {
-            color: #eab308;
-        }
-
-        .filter-btn[data-filter-type="supplier-owner"][data-supplier-owner="Alyson Colgan"] {
-            color: #ec4899;
-        }
-
-        .filter-btn[data-filter-type="supplier-owner"][data-supplier-owner="Brittany Albert"] {
-            color: #ec4899;
-        }
-
-        .filter-btn[data-filter-type="supplier-owner"][data-supplier-owner="Josh McCutchen"] {
-            color: #ea580c;
-        }
-
-        /* Supplier Owner Colors - Selected */
-        .filter-btn.active[data-filter-type="supplier-owner"][data-supplier-owner="Danny Pollak"] {
-            background-color: #2563eb;
-            border-color: #2563eb;
-            color: #000;
-        }
-
-        .filter-btn.active[data-filter-type="supplier-owner"][data-supplier-owner="Erin Bellavance"] {
-            background-color: #eab308;
-            border-color: #eab308;
-            color: #000;
-        }
-
-        .filter-btn.active[data-filter-type="supplier-owner"][data-supplier-owner="Hannah Deupree"] {
-            background-color: #eab308;
-            border-color: #eab308;
-            color: #000;
-        }
-
-        .filter-btn.active[data-filter-type="supplier-owner"][data-supplier-owner="Alyson Colgan"] {
-            background-color: #ec4899;
-            border-color: #ec4899;
-            color: #000;
-        }
-
-        .filter-btn.active[data-filter-type="supplier-owner"][data-supplier-owner="Brittany Albert"] {
-            background-color: #ec4899;
-            border-color: #ec4899;
-            color: #000;
-        }
-
-        .filter-btn.active[data-filter-type="supplier-owner"][data-supplier-owner="Josh McCutchen"] {
-            background-color: #ea580c;
-            border-color: #ea580c;
-            color: #000;
-        }
-
-        /* Owner Colors - Selected */
-        .filter-btn.active[data-filter-type="owner"][data-owner="Scott Gilroy"] {
-            background-color: #2563eb;
-            border-color: #2563eb;
-            color: #000;
-        }
-
-        .filter-btn.active[data-filter-type="owner"][data-owner="Rob Levit"] {
-            background-color: #dc2626;
-            border-color: #dc2626;
-            color: #000;
-        }
-
-        .filter-btn.active[data-filter-type="owner"][data-owner="Jen Wagoner"] {
-            background-color: #ec4899;
-            border-color: #ec4899;
-            color: #000;
-        }
-
-        .filter-btn.active[data-filter-type="owner"][data-owner="Denise Chmielewski"] {
-            background-color: #ea580c;
-            border-color: #ea580c;
-            color: #000;
-        }
-
-        .filter-btn.active[data-filter-type="owner"][data-owner="Dustin Anderson"] {
-            background-color: #6366f1;
-            border-color: #6366f1;
-            color: #000;
-        }
-
-        .filter-btn.active[data-filter-type="owner"][data-owner="Ken Sorensen"] {
-            background-color: #7c3aed;
-            border-color: #7c3aed;
-            color: #000;
-        }
-
-        .filter-btn.active[data-filter-type="owner"][data-owner="Ashley Jones"] {
-            background-color: #f59e0b;
-            border-color: #f59e0b;
-            color: #000;
-        }
-
-        .filter-btn.active[data-filter-type="owner"][data-owner="Carrie Ellis"] {
-            background-color: #06b6d4;
-            border-color: #06b6d4;
-            color: #000;
-        }
-
-        .filter-btn.active[data-filter-type="owner"][data-owner="Brooke Jones"] {
-            background-color: #8b5cf6;
-            border-color: #8b5cf6;
-            color: #000;
-        }
-
-        .filter-btn.active[data-filter-type="owner"][data-owner="Adam Levit"] {
-            background-color: #d97706;
-            border-color: #d97706;
-            color: #000;
-        }
-
-        .filter-btn.active[data-filter-type="owner"][data-owner="John Salce"] {
-            background-color: #f97316;
-            border-color: #f97316;
-            color: #000;
-        }
-
-        .clear-pill {
-            padding: 8px 16px;
-            border: 2px dotted #bbb;
-            background: white;
-            cursor: pointer;
-            border-radius: 20px;
-            font-size: 13px;
-            color: #666;
-            transition: all 0.2s;
-            font-weight: 500;
-        }
-
-        .clear-pill:hover {
-            border-color: #999;
-            background: #f9f9f9;
-        }
-
-        .search-export {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .search-box {
-            flex: 1;
-            min-width: 200px;
-            padding: 10px 14px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-
-        .search-box:focus {
-            outline: none;
-            border-color: #999;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .btn-new-task {
-            padding: 10px 16px;
-            background: #2d5a2d;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        .btn-new-task:hover {
-            background: #1f4620;
-        }
-
-        .export-btn {
-            padding: 10px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        .export-view {
-            background: #2563eb;
-            color: white;
-        }
-
-        .export-view:hover {
-            background: #1d4ed8;
-        }
-
-        .export-all {
-            background: #2563eb;
-            color: white;
-        }
-
-        .export-all:hover {
-            background: #1d4ed8;
-        }
-
-        .export-owner {
-            background: #7c3aed;
-            color: white;
-        }
-
-        .export-owner:hover {
-            background: #6d28d9;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0 12px;
-            background: transparent;
-            border-radius: 0;
-            overflow: visible;
-            box-shadow: none;
-            border: none;
-        }
-
-        th {
-            background-color: transparent;
-            padding: 14px 12px;
-            text-align: left;
-            font-weight: 700;
-            font-size: 11px;
-            text-transform: uppercase;
-            color: #666;
-            border-bottom: none;
-            letter-spacing: 0.5px;
-        }
-
-        td {
-            padding: 12px 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-            background-color: white;
-        }
-
-        tbody tr {
-            background-color: transparent;
-            border-radius: 8px;
-            padding: 8px;
-        }
-
-        tbody tr:hover td {
-            background-color: #f9f9f9;
-            border-color: #bbb;
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 4px 0;
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        .status-in-progress {
-            color: #2563eb;
-        }
-
-        .status-pending {
-            color: #ea580c;
-        }
-
-        .status-complete {
-            color: #16a34a;
-        }
-
-        .status-on-hold {
-            color: #666;
-        }
-
-        .status-info {
-            color: #7c3aed;
-        }
-
-        .priority-high {
-            color: #dc2626;
-            font-weight: 600;
-        }
-
-        .priority-medium {
-            color: #ea580c;
-            font-weight: 600;
-        }
-
-        .priority-low {
-            color: #16a34a;
-            font-weight: 600;
-        }
-
-        .due-date {
-            font-weight: 500;
-        }
-
-        .due-date.overdue {
-            color: #dc2626;
-        }
-
-        .due-date.due-soon-2 {
-            color: #ea580c;
-        }
-
-        .due-date.due-soon-7 {
-            color: #eab308;
-        }
-
-        .due-date.due-later {
-            color: #16a34a;
-        }
-
-        .field-with-dropdown {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 4px;
-            cursor: pointer;
-            padding: 2px 4px;
-            border-radius: 3px;
-            transition: background-color 0.15s;
-        }
-
-        .field-with-dropdown:hover {
-            background-color: #f0f0f0;
-        }
-
-        .dropdown-arrow {
-            font-size: 12px;
-            color: #999;
-        }
-
-        .notes-display {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            line-height: 1.4;
-        }
-
-        .client-name {
-            font-weight: 600;
-        }
-
-        .client-name[data-client="World Wide Snacks"] {
-            color: #2563eb;
-        }
-
-        .client-name[data-client="Sunrise Organics"] {
-            color: #eab308;
-        }
-
-        .client-name[data-client="Cerebelly"] {
-            color: #ec4899;
-        }
-
-        .client-name[data-client="Premier Foods"] {
-            color: #ea580c;
-        }
-
-        .owner-name {
-            font-weight: 600;
-        }
-
-        .owner-name[data-owner="Scott Gilroy"] {
-            color: #2563eb;
-        }
-
-        .owner-name[data-owner="Rob Levit"] {
-            color: #dc2626;
-        }
-
-        .owner-name[data-owner="Jen Wagoner"] {
-            color: #ec4899;
-        }
-
-        .owner-name[data-owner="Denise Chmielewski"] {
-            color: #ea580c;
-        }
-
-        .owner-name[data-owner="Dustin Anderson"] {
-            color: #6366f1;
-        }
-
-        .owner-name[data-owner="Ken Sorensen"] {
-            color: #7c3aed;
-        }
-
-        .owner-name[data-owner="Ashley Jones"] {
-            color: #f59e0b;
-        }
-
-        .owner-name[data-owner="Carrie Ellis"] {
-            color: #06b6d4;
-        }
-
-        .owner-name[data-owner="Brooke Jones"] {
-            color: #8b5cf6;
-        }
-
-        .owner-name[data-owner="Adam Levit"] {
-            color: #d97706;
-        }
-
-        .owner-name[data-owner="John Salce"] {
-            color: #f97316;
-        }
-
-        .due-date-cell {
-            cursor: pointer;
-            position: relative;
-        }
-
-        .date-picker-input {
-            position: absolute;
-            top: 0;
-            left: 0;
-            padding: 6px 8px;
-            border: 2px solid #2563eb;
-            border-radius: 4px;
-            font-size: 13px;
-            z-index: 100;
-        }
-
-        .action-icons {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .icon-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            padding: 4px 8px;
-            color: #666;
-            transition: color 0.2s;
-        }
-
-        .icon-btn:hover {
-            color: #333;
-        }
-
-        .dropdown-popup {
-            position: absolute;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 1001;
-            min-width: 160px;
-        }
-
-        .dropdown-popup-item {
-            padding: 10px 16px;
-            cursor: pointer;
-            font-size: 14px;
-            border-bottom: 1px solid #f0f0f0;
-            transition: background-color 0.15s;
-        }
-
-        .dropdown-popup-item:last-child {
-            border-bottom: none;
-        }
-
-        .dropdown-popup-item:hover {
-            background-color: #f5f5f5;
-        }
-
-        .inline-edit-field {
-            position: relative;
-        }
-
-        .inline-edit-input {
-            padding: 6px 8px;
-            border: 1px solid #2563eb;
-            border-radius: 4px;
-            font-size: 14px;
-            font-family: inherit;
-            width: 100%;
-        }
-
-        .edit-row td {
-            background-color: #f0f8ff !important;
-            border-color: #2563eb !important;
-        }
-
-        .edit-input {
-            width: 100%;
-            padding: 6px 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 13px;
-            font-family: inherit;
-        }
-
-        .edit-textarea {
-            width: 100%;
-            padding: 6px 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 13px;
-            font-family: inherit;
-            min-height: 40px;
-            resize: vertical;
-        }
-
-        .edit-actions {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-        }
-
-        .btn-save {
-            padding: 6px 12px;
-            background: #16a34a;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .btn-save:hover {
-            background: #15803d;
-        }
-
-        .btn-cancel {
-            padding: 6px 12px;
-            background: #ef4444;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .btn-cancel:hover {
-            background: #dc2626;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.show {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 24px;
-            border-radius: 4px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 16px;
-        }
-
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 4px;
-            color: #333;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-            font-family: inherit;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 8px;
-            justify-content: flex-end;
-            margin-top: 24px;
-        }
-
-        .btn-primary {
-            padding: 10px 20px;
-            background: #2d5a2d;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .btn-primary:hover {
-            background: #1f4620;
-        }
-
-        .btn-secondary {
-            padding: 10px 20px;
-            background: #e0e0e0;
-            color: #333;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .btn-secondary:hover {
-            background: #d0d0d0;
-        }
-
-        .email-preview {
-            background: #f9f9f9;
-            border: 1px solid #ddd;
-            padding: 16px;
-            border-radius: 4px;
-            margin-bottom: 16px;
-            white-space: pre-wrap;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            line-height: 1.6;
-        }
-
-        .export-preview {
-            max-height: 400px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            padding: 12px;
-            border-radius: 4px;
-            margin-bottom: 16px;
-            background: #fafafa;
-        }
-
-        .export-preview table {
-            width: 100%;
-            font-size: 12px;
-            box-shadow: none;
-            border-collapse: collapse;
-            border-spacing: 0;
-        }
-
-        .export-preview th {
-            background: #e0e0e0;
-            padding: 8px;
-            font-size: 11px;
-            border: 1px solid #ccc;
-        }
-
-        .export-preview td {
-            padding: 8px;
-            border: 1px solid #ddd;
-        }
-
-        .no-data {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-            font-size: 16px;
-        }
-
-        .owner-email-section {
-            margin-bottom: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            padding: 16px;
-            background: white;
-        }
-
-        .owner-email-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #f0f0f0;
-            cursor: pointer;
-        }
-
-        .owner-email-header:hover {
-            background-color: #f9f9f9;
-        }
-
-        .owner-name-header {
-            font-weight: 600;
-            font-size: 15px;
-        }
-
-        .owner-task-count {
-            font-size: 12px;
-            color: #999;
-            background: #f5f5f5;
-            padding: 4px 8px;
-            border-radius: 4px;
-        }
-
-        .owner-email-btn {
-            padding: 6px 12px;
-            background: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-            transition: background 0.2s;
-        }
-
-        .owner-email-btn:hover {
-            background: #1d4ed8;
-        }
-
-        .owner-tasks-list {
-            padding: 12px 0;
-        }
-
-        .owner-task-row {
-            padding: 8px 0;
+            padding: 12px 18px;
             border-bottom: 1px solid #f5f5f5;
-            font-size: 13px;
-            color: #666;
-        }
-
-        .owner-task-row:last-child {
-            border-bottom: none;
-        }
-
-        .task-detail {
             display: flex;
-            gap: 16px;
-            margin-top: 4px;
+            align-items: center;
+            gap: 12px;
         }
-
-        .task-detail-item {
-            flex: 1;
+        .filter-group:last-child { border-bottom: none; }
+        .filter-label { font-size: 11px; font-weight: 700; color: #666; text-transform: uppercase; min-width: 80px; letter-spacing: 0.5px; }
+        .filter-options { display: flex; flex-wrap: wrap; gap: 7px; flex: 1; align-items: center; }
+        .filter-btn {
+            padding: 6px 14px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            cursor: pointer;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+            color: #444;
         }
-
-        .task-detail-label {
-            font-size: 11px;
-            color: #999;
-            text-transform: uppercase;
-            font-weight: 600;
+        .filter-btn:hover { border-color: #999; transform: translateY(-1px); }
+        .filter-btn.active { font-weight: 700; color: white; }
+        .filter-btn[data-filter-type="status"][data-status="In Progress"] { color: #2563eb; border-color: #bfdbfe; }
+        .filter-btn[data-filter-type="status"][data-status="Pending"] { color: #ea580c; border-color: #fed7aa; }
+        .filter-btn[data-filter-type="status"][data-status="Complete"] { color: #16a34a; border-color: #bbf7d0; }
+        .filter-btn[data-filter-type="status"][data-status="On Hold"] { color: #6b7280; border-color: #d1d5db; }
+        .filter-btn[data-filter-type="status"][data-status="Info/Update"] { color: #7c3aed; border-color: #ddd6fe; }
+        .filter-btn.active[data-filter-type="status"][data-status="In Progress"] { background:#2563eb; border-color:#2563eb; }
+        .filter-btn.active[data-filter-type="status"][data-status="Pending"] { background:#ea580c; border-color:#ea580c; }
+        .filter-btn.active[data-filter-type="status"][data-status="Complete"] { background:#16a34a; border-color:#16a34a; }
+        .filter-btn.active[data-filter-type="status"][data-status="On Hold"] { background:#6b7280; border-color:#6b7280; }
+        .filter-btn.active[data-filter-type="status"][data-status="Info/Update"] { background:#7c3aed; border-color:#7c3aed; }
+        .filter-btn[data-filter-type="priority"][data-priority="High"] { color: #dc2626; border-color: #fca5a5; }
+        .filter-btn[data-filter-type="priority"][data-priority="Medium"] { color: #f59e0b; border-color: #fde68a; }
+        .filter-btn[data-filter-type="priority"][data-priority="Low"] { color: #22c55e; border-color: #bbf7d0; }
+        .filter-btn.active[data-filter-type="priority"][data-priority="High"] { background:#dc2626; border-color:#dc2626; }
+        .filter-btn.active[data-filter-type="priority"][data-priority="Medium"] { background:#f59e0b; border-color:#f59e0b; }
+        .filter-btn.active[data-filter-type="priority"][data-priority="Low"] { background:#22c55e; border-color:#22c55e; }
+        .filter-btn[data-filter-type="owner"][data-owner="Scott Gilroy"] { color: #2563eb; }
+        .filter-btn[data-filter-type="owner"][data-owner="Rob Levit"] { color: #dc2626; }
+        .filter-btn[data-filter-type="owner"][data-owner="Jen Wagoner"] { color: #ec4899; }
+        .filter-btn[data-filter-type="owner"][data-owner="Denise Chmielewski"] { color: #ea580c; }
+        .filter-btn[data-filter-type="owner"][data-owner="Dustin Anderson"] { color: #6366f1; }
+        .filter-btn[data-filter-type="owner"][data-owner="Ken Sorensen"] { color: #7c3aed; }
+        .filter-btn[data-filter-type="owner"][data-owner="Ashley Jones"] { color: #f59e0b; }
+        .filter-btn[data-filter-type="owner"][data-owner="Carrie Ellis"] { color: #06b6d4; }
+        .filter-btn[data-filter-type="owner"][data-owner="Brooke Jones"] { color: #8b5cf6; }
+        .filter-btn[data-filter-type="owner"][data-owner="Adam Levit"] { color: #d97706; }
+        .filter-btn[data-filter-type="owner"][data-owner="John Salce"] { color: #f97316; }
+        .filter-btn[data-filter-type="owner"][data-owner="N/A"] { color: #9ca3af; }
+        .filter-btn.active[data-filter-type="owner"][data-owner="Scott Gilroy"] { background:#2563eb; border-color:#2563eb; }
+        .filter-btn.active[data-filter-type="owner"][data-owner="Rob Levit"] { background:#dc2626; border-color:#dc2626; }
+        .filter-btn.active[data-filter-type="owner"][data-owner="Jen Wagoner"] { background:#ec4899; border-color:#ec4899; }
+        .filter-btn.active[data-filter-type="owner"][data-owner="Denise Chmielewski"] { background:#ea580c; border-color:#ea580c; }
+        .filter-btn.active[data-filter-type="owner"][data-owner="Dustin Anderson"] { background:#6366f1; border-color:#6366f1; }
+        .filter-btn.active[data-filter-type="owner"][data-owner="Ken Sorensen"] { background:#7c3aed; border-color:#7c3aed; }
+        .filter-btn.active[data-filter-type="owner"][data-owner="Ashley Jones"] { background:#f59e0b; border-color:#f59e0b; }
+        .filter-btn.active[data-filter-type="owner"][data-owner="Carrie Ellis"] { background:#06b6d4; border-color:#06b6d4; }
+        .filter-btn.active[data-filter-type="owner"][data-owner="Brooke Jones"] { background:#8b5cf6; border-color:#8b5cf6; }
+        .filter-btn.active[data-filter-type="owner"][data-owner="Adam Levit"] { background:#d97706; border-color:#d97706; }
+        .filter-btn.active[data-filter-type="owner"][data-owner="John Salce"] { background:#f97316; border-color:#f97316; }
+        .filter-btn.active[data-filter-type="owner"][data-owner="N/A"] { background:#9ca3af; border-color:#9ca3af; }
+        .filter-btn[data-filter-type="supplier-owner"][data-supplier-owner="Danny Pollak"] { color: #2563eb; }
+        .filter-btn[data-filter-type="supplier-owner"][data-supplier-owner="Erin Bellavance"] { color: #ca8a04; }
+        .filter-btn[data-filter-type="supplier-owner"][data-supplier-owner="Hannah Deupree"] { color: #ca8a04; }
+        .filter-btn[data-filter-type="supplier-owner"][data-supplier-owner="Alyson Colgan"] { color: #db2777; }
+        .filter-btn[data-filter-type="supplier-owner"][data-supplier-owner="Brittany Albert"] { color: #db2777; }
+        .filter-btn[data-filter-type="supplier-owner"][data-supplier-owner="Josh McCutchen"] { color: #ea580c; }
+        .filter-btn.active[data-filter-type="supplier-owner"][data-supplier-owner="Danny Pollak"] { background:#2563eb; border-color:#2563eb; }
+        .filter-btn.active[data-filter-type="supplier-owner"][data-supplier-owner="Erin Bellavance"] { background:#ca8a04; border-color:#ca8a04; }
+        .filter-btn.active[data-filter-type="supplier-owner"][data-supplier-owner="Hannah Deupree"] { background:#ca8a04; border-color:#ca8a04; }
+        .filter-btn.active[data-filter-type="supplier-owner"][data-supplier-owner="Alyson Colgan"] { background:#db2777; border-color:#db2777; }
+        .filter-btn.active[data-filter-type="supplier-owner"][data-supplier-owner="Brittany Albert"] { background:#db2777; border-color:#db2777; }
+        .filter-btn.active[data-filter-type="supplier-owner"][data-supplier-owner="Josh McCutchen"] { background:#ea580c; border-color:#ea580c; }
+        .clear-pill {
+            padding: 6px 14px; border: 2px dashed #ccc; background: white;
+            cursor: pointer; border-radius: 20px; font-size: 12px; color: #888;
+            transition: all 0.2s; font-weight: 500;
         }
+        .clear-pill:hover { border-color: #999; background: #f5f5f5; color: #555; }
+        .search-export { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; }
+        .search-box {
+            flex: 1; min-width: 220px; padding: 11px 16px;
+            border: 2px solid #e0e0e0; border-radius: 10px; font-size: 15px;
+            background: white; box-shadow: 0 1px 4px rgba(0,0,0,0.05); transition: border-color 0.2s;
+        }
+        .search-box:focus { outline: none; border-color: #2d5a2d; box-shadow: 0 0 0 3px rgba(45,90,45,0.1); }
+        .action-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn-new-task {
+            padding: 10px 20px; background: #2d5a2d; color: white; border: none;
+            border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 700;
+            transition: all 0.2s; box-shadow: 0 2px 8px rgba(45,90,45,0.3);
+        }
+        .btn-new-task:hover { background: #1f4620; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(45,90,45,0.4); }
+        .export-btn { padding: 10px 16px; border: none; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; }
+        .export-btn:hover { transform: translateY(-1px); }
+        .export-view { background: #2563eb; color: white; box-shadow: 0 2px 8px rgba(37,99,235,0.3); }
+        .export-view:hover { background: #1d4ed8; }
+        .export-all { background: #2563eb; color: white; box-shadow: 0 2px 8px rgba(37,99,235,0.3); }
+        .export-all:hover { background: #1d4ed8; }
+        .export-owner { background: #7c3aed; color: white; box-shadow: 0 2px 8px rgba(124,58,237,0.3); }
+        .export-owner:hover { background: #6d28d9; }
+        .table-wrapper {
+            background: white; border-radius: 14px; overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08); border: 1px solid #e8e8e8;
+        }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        thead tr { position: sticky; top: 0; z-index: 10; }
+        th {
+            background: #f7f8fa; padding: 14px 14px; text-align: left;
+            font-weight: 700; font-size: 11px; text-transform: uppercase;
+            color: #555; letter-spacing: 0.6px; border-bottom: 2px solid #e8e8e8; white-space: nowrap;
+        }
+        td { padding: 14px 14px; border-bottom: 1px solid #f0f0f0; font-size: 14.5px; vertical-align: middle; }
+        tbody tr { transition: background 0.15s; }
+        tbody tr:nth-child(even) td { background: #fafbfc; }
+        tbody tr:hover td { background: #f0f7f0 !important; }
+        tbody tr:last-child td { border-bottom: none; }
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 5px 12px; border-radius: 20px; font-size: 12.5px;
+            font-weight: 600; white-space: nowrap;
+        }
+        .status-in-progress { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+        .status-pending { background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; }
+        .status-complete { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+        .status-on-hold { background: #f9fafb; color: #6b7280; border: 1px solid #d1d5db; }
+        .status-info-update { background: #faf5ff; color: #7c3aed; border: 1px solid #ddd6fe; }
+        .priority-high { color: #dc2626; font-weight: 700; }
+        .priority-medium { color: #d97706; font-weight: 700; }
+        .priority-low { color: #16a34a; font-weight: 700; }
+        .due-date { font-weight: 600; font-size: 13.5px; }
+        .due-date.overdue { color: #dc2626; }
+        .due-date.due-soon-2 { color: #ea580c; }
+        .due-date.due-soon-7 { color: #d97706; }
+        .due-date.due-later { color: #16a34a; }
+        .field-with-dropdown {
+            display: flex; justify-content: space-between; align-items: center; gap: 4px;
+            cursor: pointer; padding: 3px 6px; border-radius: 6px; transition: background-color 0.15s;
+        }
+        .field-with-dropdown:hover { background-color: #f0f0f0; }
+        .dropdown-arrow { font-size: 11px; color: #bbb; }
+        .notes-display { white-space: pre-wrap; word-wrap: break-word; line-height: 1.5; font-size: 13.5px; color: #555; }
+        .client-name { font-weight: 700; font-size: 14px; }
+        .client-name[data-client="World Wide Snacks"] { color: #2563eb; }
+        .client-name[data-client="Sunrise Organics"] { color: #ca8a04; }
+        .client-name[data-client="Cerebelly"] { color: #db2777; }
+        .client-name[data-client="Premier Foods"] { color: #ea580c; }
+        .owner-name { font-weight: 600; }
+        .owner-name[data-owner="Scott Gilroy"] { color: #2563eb; }
+        .owner-name[data-owner="Rob Levit"] { color: #dc2626; }
+        .owner-name[data-owner="Jen Wagoner"] { color: #ec4899; }
+        .owner-name[data-owner="Denise Chmielewski"] { color: #ea580c; }
+        .owner-name[data-owner="Dustin Anderson"] { color: #6366f1; }
+        .owner-name[data-owner="Ken Sorensen"] { color: #7c3aed; }
+        .owner-name[data-owner="Ashley Jones"] { color: #f59e0b; }
+        .owner-name[data-owner="Carrie Ellis"] { color: #06b6d4; }
+        .owner-name[data-owner="Brooke Jones"] { color: #8b5cf6; }
+        .owner-name[data-owner="Adam Levit"] { color: #d97706; }
+        .owner-name[data-owner="John Salce"] { color: #f97316; }
+        .due-date-cell { cursor: pointer; position: relative; }
+        .date-picker-input { position: absolute; top: 0; left: 0; padding: 6px 8px; border: 2px solid #2563eb; border-radius: 6px; font-size: 13px; z-index: 100; }
+        .action-icons { display: flex; gap: 6px; align-items: center; }
+        .icon-btn { background: #f5f5f5; border: 1px solid #e0e0e0; cursor: pointer; font-size: 15px; padding: 5px 9px; color: #666; transition: all 0.2s; border-radius: 7px; }
+        .icon-btn:hover { background: #e8e8e8; color: #333; }
+        .dropdown-popup { position: absolute; background: white; border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); z-index: 1001; min-width: 170px; overflow: hidden; }
+        .dropdown-popup-item { padding: 10px 16px; cursor: pointer; font-size: 14px; border-bottom: 1px solid #f5f5f5; transition: background-color 0.15s; }
+        .dropdown-popup-item:last-child { border-bottom: none; }
+        .dropdown-popup-item:hover { background-color: #f0f7f0; }
+        .inline-edit-field { position: relative; cursor: text; }
+        .inline-edit-input { padding: 6px 8px; border: 2px solid #2563eb; border-radius: 6px; font-size: 14px; font-family: inherit; width: 100%; }
+        .edit-input { width:100%; padding:6px 8px; border:1px solid #ddd; border-radius:6px; font-size:13px; font-family:inherit; }
+        .edit-textarea { width:100%; padding:6px 8px; border:1px solid #ddd; border-radius:6px; font-size:13px; font-family:inherit; min-height:40px; resize:vertical; }
+        .edit-actions { display:flex; gap:6px; align-items:center; }
+        .btn-save { padding:6px 12px; background:#16a34a; color:white; border:none; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600; }
+        .btn-save:hover { background:#15803d; }
+        .btn-cancel { padding:6px 12px; background:#ef4444; color:white; border:none; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600; }
+        .btn-cancel:hover { background:#dc2626; }
+        .no-data { text-align: center; padding: 60px 40px; color: #aaa; font-size: 16px; background: white; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border: 1px solid #e8e8e8; }
+        .no-data-icon { font-size: 40px; margin-bottom: 12px; }
+        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.55); z-index:1000; align-items:center; justify-content:center; }
+        .modal.show { display:flex; }
+        .modal-content { background:white; padding:28px; border-radius:14px; max-width:600px; width:90%; max-height:85vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.3); }
+        .modal-header { font-size:19px; font-weight:700; margin-bottom:18px; color:#1a1a1a; }
+        .form-group { margin-bottom:16px; }
+        .form-group label { display:block; font-size:13px; font-weight:600; margin-bottom:5px; color:#444; }
+        .form-group input, .form-group select, .form-group textarea { width:100%; padding:9px 10px; border:2px solid #e0e0e0; border-radius:8px; font-size:14px; font-family:inherit; transition:border-color 0.2s; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline:none; border-color:#2d5a2d; }
+        .form-group textarea { resize:vertical; min-height:100px; }
+        .form-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:24px; }
+        .btn-primary { padding:10px 22px; background:#2d5a2d; color:white; border:none; border-radius:8px; cursor:pointer; font-size:14px; font-weight:700; transition:all 0.2s; }
+        .btn-primary:hover { background:#1f4620; }
+        .btn-secondary { padding:10px 22px; background:#e8e8e8; color:#444; border:none; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; }
+        .btn-secondary:hover { background:#d8d8d8; }
+        .email-preview { background:#f8f9fa; border:1px solid #e0e0e0; padding:16px; border-radius:8px; margin-bottom:16px; white-space:pre-wrap; font-family:'Courier New',monospace; font-size:13px; line-height:1.6; }
+        .export-preview { max-height:400px; overflow-y:auto; border:1px solid #e0e0e0; padding:12px; border-radius:8px; margin-bottom:16px; background:#fafafa; }
+        .export-preview table { width:100%; font-size:12px; box-shadow:none; border-collapse:collapse; }
+        .export-preview th { background:#e8e8e8; padding:8px; font-size:11px; border:1px solid #ccc; }
+        .export-preview td { padding:8px; border:1px solid #ddd; }
+        .owner-email-section { margin-bottom:10px; border:1px solid #e8e8e8; border-radius:10px; padding:14px; background:white; }
+        .owner-email-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid #f0f0f0; cursor:pointer; }
+        .owner-email-header:hover { background-color:#f9f9f9; border-radius:8px; }
+        .owner-name-header { font-weight:700; font-size:15px; }
+        .owner-task-count { font-size:12px; color:#999; background:#f0f0f0; padding:3px 8px; border-radius:10px; }
+        .owner-email-btn { padding:6px 12px; background:#2563eb; color:white; border:none; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600; }
+        .owner-email-btn:hover { background:#1d4ed8; }
+        .owner-tasks-list { padding:10px 0; }
+        .owner-task-row { padding:8px 0; border-bottom:1px solid #f5f5f5; font-size:13px; color:#666; }
+        .owner-task-row:last-child { border-bottom:none; }
+        .task-detail { display:flex; gap:14px; margin-top:4px; }
+        .task-detail-item { flex:1; }
+        .task-detail-label { font-size:11px; color:#aaa; text-transform:uppercase; font-weight:700; }
     </style>
 </head>
 <body>
