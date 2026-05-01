@@ -268,19 +268,8 @@
         .client-name[data-client="Sunrise Organics"] { color: #ca8a04; }
         .client-name[data-client="Cerebelly"] { color: #db2777; }
         .client-name[data-client="Premier Foods"] { color: #ea580c; }
-        .owner-name { font-weight: 600; }
-        .owner-name[data-owner="Scott Gilroy"] { color: #2563eb; }
-        .owner-name[data-owner="Rob Levit"] { color: #dc2626; }
-        .owner-name[data-owner="Jen Wagoner"] { color: #ec4899; }
-        .owner-name[data-owner="Denise Chmielewski"] { color: #ea580c; }
-        .owner-name[data-owner="Dustin Anderson"] { color: #6366f1; }
-        .owner-name[data-owner="Ken Sorensen"] { color: #7c3aed; }
-        .owner-name[data-owner="Ashley Jones"] { color: #f59e0b; }
-        .owner-name[data-owner="Carrie Ellis"] { color: #06b6d4; }
-        .owner-name[data-owner="Brooke Jones"] { color: #8b5cf6; }
-        .owner-name[data-owner="Adam Levit"] { color: #d97706; }
-        .owner-name[data-owner="John Salce"] { color: #f97316; }
-        .due-date-cell { cursor: pointer; position: relative; }
+        .owner-name { font-weight: 600; color: #166534; }
+        .filter-btn[data-filter-type="owner"] { color: #166534; }
         .date-picker-input { position: absolute; top: 0; left: 0; padding: 6px 8px; border: 2px solid #2563eb; border-radius: 6px; font-size: 13px; z-index: 100; }
         .action-icons { display: flex; gap: 6px; align-items: center; }
         .icon-btn { background: #f5f5f5; border: 1px solid #e0e0e0; cursor: pointer; font-size: 15px; padding: 5px 9px; color: #666; transition: all 0.2s; border-radius: 7px; }
@@ -343,7 +332,7 @@
         const CLIENTS = ['All Clients', 'World Wide Snacks', 'Sunrise Organics', 'Cerebelly', 'Premier Foods'];
         const STATUSES = ['In Progress', 'Pending', 'Complete', 'On Hold', 'Info/Update'];
         const PRIORITIES = ['High', 'Medium', 'Low'];
-        const OWNERS = ['Scott Gilroy', 'Rob Levit', 'Jen Wagoner', 'Denise Chmielewski', 'Dustin Anderson', 'Ken Sorensen', 'Ashley Jones', 'Carrie Ellis', 'Brooke Jones', 'Adam Levit', 'John Salce', 'N/A'];
+        const OWNERS = ['Scott Gilroy', 'Rob Levit', 'Jen Wagoner', 'Denise Chmielewski', 'Dustin Anderson', 'Ken Sorensen', 'Ashley Jones', 'Carrie Ellis', 'Brooke Jones', 'Adam Levit', 'John Salce', 'Julie Ann Hackett', 'Matt Bennett', 'Haley Saffel', 'April McHone', 'N/A'];
         const SUPPLIER_OWNERS = ['Danny Pollak', 'Erin Bellavance', 'Hannah Deupree', 'Alyson Colgan', 'Brittany Albert', 'Josh McCutchen'];
 
         const getSupplierOwnersForClient = (client) => {
