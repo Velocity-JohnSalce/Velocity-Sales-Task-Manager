@@ -1138,15 +1138,15 @@
         const CLIENTS = ['All Clients', 'World Wide Snacks', 'Sunrise Organics', 'Cerebelly', 'Premier Foods'];
         const STATUSES = ['In Progress', 'Pending', 'Complete', 'On Hold', 'Info/Update'];
         const PRIORITIES = ['High', 'Medium', 'Low'];
-        const OWNERS = ['Scott Gilroy', 'Rob Levit', 'Jen Wagoner', 'Denise Chmielewski', 'Dustin Anderson', 'Ken Sorensen', 'Ashley Jones', 'Carrie Ellis', 'Brooke Jones', 'Adam Levit', 'John Salce'];
+        const OWNERS = ['Scott Gilroy', 'Rob Levit', 'Jen Wagoner', 'Denise Chmielewski', 'Dustin Anderson', 'Ken Sorensen', 'Ashley Jones', 'Carrie Ellis', 'Brooke Jones', 'Adam Levit', 'John Salce', 'N/A'];
         const SUPPLIER_OWNERS = ['Danny Pollak', 'Erin Bellavance', 'Hannah Deupree', 'Alyson Colgan', 'Brittany Albert', 'Josh McCutchen'];
 
         const getSupplierOwnersForClient = (client) => {
             const map = {
-                'World Wide Snacks': ['Danny Pollak'],
-                'Sunrise Organics': ['Erin Bellavance', 'Hannah Deupree'],
-                'Cerebelly': ['Alyson Colgan', 'Brittany Albert'],
-                'Premier Foods': ['Josh McCutchen']
+                'World Wide Snacks': ['Danny Pollak', 'N/A'],
+                'Sunrise Organics': ['Erin Bellavance', 'Hannah Deupree', 'N/A'],
+                'Cerebelly': ['Alyson Colgan', 'Brittany Albert', 'N/A'],
+                'Premier Foods': ['Josh McCutchen', 'N/A']
             };
             return map[client] || [];
         };
