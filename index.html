@@ -1898,12 +1898,12 @@ Date: ${today}`;
                                 </select>
                             </div>
                             <div className="form-group">
-                                <label>Client Owner *</label>
+                                <label>Client Owner</label>
                                 <select
                                     name="clientOwner"
                                     value={formData.clientOwner}
                                     onChange={handleFormChange}
-                                    disabled={!formData.client}
+                                    
                                 >
                                     <option value="">Select a client owner</option>
                                     {formData.client && getSupplierOwnersForClient(formData.client).map(owner => (
@@ -1922,7 +1922,7 @@ Date: ${today}`;
                                 />
                             </div>
                             <div className="form-group">
-                                <label>Task *</label>
+                                <label>Task</label>
                                 <input
                                     type="text"
                                     name="task"
@@ -1932,7 +1932,7 @@ Date: ${today}`;
                                 />
                             </div>
                             <div className="form-group">
-                                <label>Owner *</label>
+                                <label>Owner</label>
                                 <select
                                     name="owner"
                                     value={formData.owner}
@@ -1954,7 +1954,7 @@ Date: ${today}`;
                                 />
                             </div>
                             <div className="form-group">
-                                <label>Status *</label>
+                                <label>Status</label>
                                 <select
                                     name="status"
                                     value={formData.status}
@@ -1967,7 +1967,7 @@ Date: ${today}`;
                                 </select>
                             </div>
                             <div className="form-group">
-                                <label>Priority *</label>
+                                <label>Priority</label>
                                 <select
                                     name="priority"
                                     value={formData.priority}
