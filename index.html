@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Velocity Task Manager</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .header {
+            background-color: #2d5a2d;
+            color: white;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .header-left p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .client-nav {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .client-btn {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .client-btn:hover {
+            background-color: #f0f0f0;
+        }
+
+        .client-btn.active {
+            background-color: #2d5a2d;
+            color: white;
+            border-color: #2d5a2d;
+        }
+
+        .filters-section {
+            background: white;
+            padding: 16px;
+            border-radius: 4px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .filter-group {
+            margin-bottom: 16px;
+        }
+
+        .filter-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .filter-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .filter-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: none;
+            background: #f0f0f0;
+            cursor: pointer;
+            border-radius: 20px;
+            font-size: 13px;
+            transition: all 0.2s;
+            color: #333;
+        }
+
+        .filter-btn:hover {
+            background-color: #e0e0e0;
+        }
+
+        .filter-btn.active {
+            font-weight: 500;
+        }
+
+        .filter-btn.active[data-filter-type="status"] {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .filter-btn.active[data-filter-type="priority"] {
+            background-color: #fff3e0;
+            color: #e65100;
+        }
+
+        .filter-btn.active[data-filter-type="owner"] {
+            background-color: #f3e5f5;
+            color: #6a1b9a;
+        }
+
+        .clear-pill {
+            padding: 6px 12px;
+            border: 2px dotted #bbb;
+            background: #fafafa;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .clear-pill:hover {
+            background-color: #f0f0f0;
+            border-color: #999;
+        }
+
+        .search-export {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .export-btn {
+            padding: 10px 16px;
+            background: #2d5a2d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .export-btn:hover {
+            background: #1f4620;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            margin-right: 4px;
+        }
+
+        .action-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .add-task-btn {
+            padding: 10px 20px;
+            background: #2d5a2d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+
+        .add-task-btn:hover {
+            background: #1f4620;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        th {
+            background-color: #f5f5f5;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #666;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 14px;
+        }
+
+        tr:hover {
+            background-color: #fafafa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-in-progress { background: #fff3cd; color: #856404; }
+        .status-pending { background: #cfe2ff; color: #084298; }
+        .status-complete { background: #d1e7dd; color: #0f5132; }
+        .status-on-hold { background: #f8d7da; color: #842029; }
+        .status-info { background: #d1ecf1; color: #0c5460; }
+
+        .priority-high { color: #c41c3b; font-weight: 600; }
+        .priority-medium { color: #ff9800; font-weight: 600; }
+        .priority-low { color: #4caf50; font-weight: 600; }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 24px;
+            border-radius: 4px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+
+        .btn-primary {
+            padding: 10px 20px;
+            background: #2d5a2d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .btn-primary:hover {
+            background: #1f4620;
+        }
+
+        .btn-secondary {
+            padding: 10px 20px;
+            background: #e0e0e0;
+            color: #333;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .email-preview {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 16px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .export-preview {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            background: #fafafa;
+        }
+
+        .export-preview table {
+            width: 100%;
+            font-size: 12px;
+            box-shadow: none;
+        }
+
+        .export-preview th {
+            background: #e0e0e0;
+            padding: 8px;
+            font-size: 11px;
+        }
+
+        .export-preview td {
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const CLIENTS = ['All Clients', 'World Wide Snacks', 'Sunrise Organics', 'Cerebelly', 'Premier Foods'];
+        const STATUSES = ['In Progress', 'Pending', 'Complete', 'On Hold', 'Info/Update'];
+        const PRIORITIES = ['High', 'Medium', 'Low'];
+        const OWNERS = ['Scott Gilroy', 'Rob Levit', 'Jen Wagoner', 'Denise Chmielewski', 'Dustin Anderson', 'Ken Sorensen', 'Ashley Jones', 'Carrie Ellis', 'Brooke Jones', 'Adam Levit', 'John Salce'];
+
+        function TaskManager() {
+            const [tasks, setTasks] = useState([]);
+            const [selectedClient, setSelectedClient] = useState('All Clients');
+            const [selectedStatuses, setSelectedStatuses] = useState([]);
+            const [selectedPriorities, setSelectedPriorities] = useState([]);
+            const [selectedOwners, setSelectedOwners] = useState([]);
+            const [searchTerm, setSearchTerm] = useState('');
+            const [showModal, setShowModal] = useState(false);
+            const [showEmailModal, setShowEmailModal] = useState(false);
+            const [showExportModal, setShowExportModal] = useState(false);
+            const [exportType, setExportType] = useState('view');
+            const [exportData, setExportData] = useState([]);
+            const [editingTask, setEditingTask] = useState(null);
+            const [emailTask, setEmailTask] = useState(null);
+            const [formData, setFormData] = useState({
+                client: '',
+                category: '',
+                task: '',
+                owner: '',
+                dueDate: '',
+                status: '',
+                priority: '',
+                notes: ''
+            });
+
+            // Load tasks from localStorage on mount
+            useEffect(() => {
+                const savedTasks = localStorage.getItem('velocityTasks');
+                if (savedTasks) {
+                    setTasks(JSON.parse(savedTasks));
+                }
+            }, []);
+
+            // Save tasks to localStorage whenever they change
+            useEffect(() => {
+                localStorage.setItem('velocityTasks', JSON.stringify(tasks));
+            }, [tasks]);
+
+            const filterTasks = () => {
+                return tasks.filter(task => {
+                    const clientMatch = selectedClient === 'All Clients' || task.client === selectedClient;
+                    const statusMatch = selectedStatuses.length === 0 || selectedStatuses.includes(task.status);
+                    const priorityMatch = selectedPriorities.length === 0 || selectedPriorities.includes(task.priority);
+                    const ownerMatch = selectedOwners.length === 0 || selectedOwners.includes(task.owner);
+                    const searchMatch = searchTerm === '' ||
+                        task.task.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        task.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        task.notes.toLowerCase().includes(searchTerm.toLowerCase());
+
+                    return clientMatch && statusMatch && priorityMatch && ownerMatch && searchMatch;
+                });
+            };
+
+            const filteredTasks = filterTasks();
+
+            const handleAddTask = () => {
+                setFormData({
+                    client: '',
+                    category: '',
+                    task: '',
+                    owner: '',
+                    dueDate: '',
+                    status: '',
+                    priority: '',
+                    notes: ''
+                });
+                setEditingTask(null);
+                setShowModal(true);
+            };
+
+            const handleEditTask = (task) => {
+                setFormData(task);
+                setEditingTask(task.id);
+                setShowModal(true);
+            };
+
+            const handleDeleteTask = (id) => {
+                if (confirm('Are you sure you want to delete this task?')) {
+                    setTasks(tasks.filter(t => t.id !== id));
+                }
+            };
+
+            const handleFormChange = (e) => {
+                const { name, value } = e.target;
+                setFormData(prev => ({
+                    ...prev,
+                    [name]: value
+                }));
+            };
+
+            const handleFormSubmit = () => {
+                if (!formData.client || !formData.task || !formData.owner || !formData.status || !formData.priority) {
+                    alert('Please fill in all required fields');
+                    return;
+                }
+
+                if (editingTask) {
+                    setTasks(tasks.map(t => t.id === editingTask ? { ...formData, id: editingTask } : t));
+                } else {
+                    const newTask = {
+                        ...formData,
+                        id: Date.now().toString()
+                    };
+                    setTasks([...tasks, newTask]);
+                }
+                setShowModal(false);
+            };
+
+            const handleEmailTask = (task) => {
+                setEmailTask(task);
+                setShowEmailModal(true);
+            };
+
+            const generateEmailContent = (task) => {
+                const today = new Date().toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                return `Subject: Follow-up: ${task.task}
+
+Hi,
+
+Thank you for our recent meeting. I wanted to follow up on the following points related to ${task.task}:
+
+Task Details:
+Client: ${task.client}
+Category: ${task.category}
+Task: ${task.task}
+Owner: ${task.owner}
+Status: ${task.status}
+Priority: ${task.priority}
+
+Due Date: ${task.dueDate}
+
+Notes:
+${task.notes}
+
+Please let me know if you have any questions or if you'd like to discuss this further.
+
+Best regards,
+John Salce
+john.salce@velocitysalesmanagement.net
+
+Date: ${today}`;
+            };
+
+            const prepareExport = (type) => {
+                let dataToExport = [];
+
+                if (type === 'view') {
+                    dataToExport = filteredTasks;
+                } else if (type === 'all') {
+                    dataToExport = tasks;
+                } else if (type === 'owner') {
+                    dataToExport = filteredTasks;
+                }
+
+                setExportData(dataToExport);
+                setExportType(type);
+                setShowExportModal(true);
+            };
+
+            const downloadCSV = () => {
+                let csvContent = '';
+                let dataToExport = exportData;
+
+                if (exportType === 'owner') {
+                    const ownerGroups = {};
+                    dataToExport.forEach(task => {
+                        if (!ownerGroups[task.owner]) {
+                            ownerGroups[task.owner] = [];
+                        }
+                        ownerGroups[task.owner].push(task);
+                    });
+
+                    Object.keys(ownerGroups).forEach(owner => {
+                        csvContent += `\n${owner}\n`;
+                        csvContent += 'Client,Category,Task,Due Date,Status,Priority,Notes\n';
+                        ownerGroups[owner].forEach(task => {
+                            csvContent += `"${task.client}","${task.category}","${task.task}","${task.dueDate}","${task.status}","${task.priority}","${task.notes}"\n`;
+                        });
+                    });
+                } else {
+                    csvContent = 'Client,Category,Task,Owner,Due Date,Status,Priority,Notes\n';
+                    dataToExport.forEach(task => {
+                        csvContent += `"${task.client}","${task.category}","${task.task}","${task.owner}","${task.dueDate}","${task.status}","${task.priority}","${task.notes}"\n`;
+                    });
+                }
+
+                const element = document.createElement('a');
+                element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent));
+                element.setAttribute('download', `tasks-export-${new Date().toISOString().split('T')[0]}.csv`);
+                element.style.display = 'none';
+                document.body.appendChild(element);
+                element.click();
+                document.body.removeChild(element);
+                setShowExportModal(false);
+            };
+
+            const getStatusBadgeClass = (status) => {
+                return `status-badge status-${status.toLowerCase().replace(/[\/\s]/g, '-')}`;
+            };
+
+            const getPriorityClass = (priority) => {
+                return `priority-${priority.toLowerCase()}`;
+            };
+
+            return (
+                <>
+                    <div className="header">
+                        <div className="header-left">
+                            <h1>Velocity Task Manager</h1>
+                            <p>john.salce@velocitysalesmanagement.net</p>
+                        </div>
+                    </div>
+
+                    <div className="container">
+                        <div className="client-nav">
+                            {CLIENTS.map(client => (
+                                <button
+                                    key={client}
+                                    className={`client-btn ${selectedClient === client ? 'active' : ''}`}
+                                    onClick={() => setSelectedClient(client)}
+                                >
+                                    {client}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="filters-section">
+                            <div className="filter-group">
+                                <div className="filter-label">
+                                    <span>Status</span>
+                                    {selectedStatuses.length > 0 && (
+                                        <button
+                                            className="clear-pill"
+                                            onClick={() => setSelectedStatuses([])}
+                                        >
+                                            Clear
+                                        </button>
+                                    )}
+                                </div>
+                                <div className="filter-options">
+                                    {STATUSES.map(status => (
+                                        <button
+                                            key={status}
+                                            data-filter-type="status"
+                                            className={`filter-btn ${selectedStatuses.includes(status) ? 'active' : ''}`}
+                                            onClick={() => {
+                                                setSelectedStatuses(prev =>
+                                                    prev.includes(status)
+                                                        ? prev.filter(s => s !== status)
+                                                        : [...prev, status]
+                                                );
+                                            }}
+                                        >
+                                            {status}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="filter-group">
+                                <div className="filter-label">
+                                    <span>Priority</span>
+                                    {selectedPriorities.length > 0 && (
+                                        <button
+                                            className="clear-pill"
+                                            onClick={() => setSelectedPriorities([])}
+                                        >
+                                            Clear
+                                        </button>
+                                    )}
+                                </div>
+                                <div className="filter-options">
+                                    {PRIORITIES.map(priority => (
+                                        <button
+                                            key={priority}
+                                            data-filter-type="priority"
+                                            className={`filter-btn ${selectedPriorities.includes(priority) ? 'active' : ''}`}
+                                            onClick={() => {
+                                                setSelectedPriorities(prev =>
+                                                    prev.includes(priority)
+                                                        ? prev.filter(p => p !== priority)
+                                                        : [...prev, priority]
+                                                );
+                                            }}
+                                        >
+                                            {priority}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="filter-group">
+                                <div className="filter-label">
+                                    <span>Owner</span>
+                                    {selectedOwners.length > 0 && (
+                                        <button
+                                            className="clear-pill"
+                                            onClick={() => setSelectedOwners([])}
+                                        >
+                                            Clear
+                                        </button>
+                                    )}
+                                </div>
+                                <div className="filter-options">
+                                    {OWNERS.map(owner => (
+                                        <button
+                                            key={owner}
+                                            data-filter-type="owner"
+                                            className={`filter-btn ${selectedOwners.includes(owner) ? 'active' : ''}`}
+                                            onClick={() => {
+                                                setSelectedOwners(prev =>
+                                                    prev.includes(owner)
+                                                        ? prev.filter(o => o !== owner)
+                                                        : [...prev, owner]
+                                                );
+                                            }}
+                                        >
+                                            {owner}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="search-export">
+                            <input
+                                type="text"
+                                className="search-box"
+                                placeholder="Search tasks..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                            <button className="export-btn" onClick={() => prepareExport('view')}>
+                                Export View
+                            </button>
+                            <button className="export-btn" onClick={() => prepareExport('all')}>
+                                Export All
+                            </button>
+                            <button className="export-btn" onClick={() => prepareExport('owner')}>
+                                Export by Owner
+                            </button>
+                        </div>
+
+                        <button className="add-task-btn" onClick={handleAddTask}>
+                            + Add Task
+                        </button>
+
+                        {filteredTasks.length === 0 ? (
+                            <div className="no-data">
+                                No tasks found
+                            </div>
+                        ) : (
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Category</th>
+                                        <th>Task</th>
+                                        <th>Owner</th>
+                                        <th>Due Date</th>
+                                        <th>Status</th>
+                                        <th>Priority</th>
+                                        <th>Notes</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredTasks.map(task => (
+                                        <tr key={task.id}>
+                                            <td>{task.category}</td>
+                                            <td>{task.task}</td>
+                                            <td>{task.owner}</td>
+                                            <td>{task.dueDate}</td>
+                                            <td><span className={getStatusBadgeClass(task.status)}>{task.status}</span></td>
+                                            <td><span className={getPriorityClass(task.priority)}>{task.priority}</span></td>
+                                            <td>{task.notes.substring(0, 50)}...</td>
+                                            <td>
+                                                <button className="action-btn" onClick={() => handleEmailTask(task)}>
+                                                    Email
+                                                </button>
+                                                <button className="action-btn" onClick={() => handleEditTask(task)}>
+                                                    Edit
+                                                </button>
+                                                <button className="action-btn" onClick={() => handleDeleteTask(task.id)}>
+                                                    Delete
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
+                    </div>
+
+                    {/* Task Modal */}
+                    <div className={`modal ${showModal ? 'show' : ''}`}>
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                {editingTask ? 'Edit Task' : 'Create New Task'}
+                            </div>
+                            <div className="form-group">
+                                <label>Client *</label>
+                                <select
+                                    name="client"
+                                    value={formData.client}
+                                    onChange={handleFormChange}
+                                >
+                                    <option value="">Select a client</option>
+                                    {CLIENTS.filter(c => c !== 'All Clients').map(client => (
+                                        <option key={client} value={client}>{client}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label>Category</label>
+                                <input
+                                    type="text"
+                                    name="category"
+                                    value={formData.category}
+                                    onChange={handleFormChange}
+                                    placeholder="e.g., Sales, Support, Development"
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Task *</label>
+                                <input
+                                    type="text"
+                                    name="task"
+                                    value={formData.task}
+                                    onChange={handleFormChange}
+                                    placeholder="Task description"
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Owner *</label>
+                                <select
+                                    name="owner"
+                                    value={formData.owner}
+                                    onChange={handleFormChange}
+                                >
+                                    <option value="">Select owner</option>
+                                    {OWNERS.map(owner => (
+                                        <option key={owner} value={owner}>{owner}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label>Due Date</label>
+                                <input
+                                    type="date"
+                                    name="dueDate"
+                                    value={formData.dueDate}
+                                    onChange={handleFormChange}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Status *</label>
+                                <select
+                                    name="status"
+                                    value={formData.status}
+                                    onChange={handleFormChange}
+                                >
+                                    <option value="">Select status</option>
+                                    {STATUSES.map(status => (
+                                        <option key={status} value={status}>{status}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label>Priority *</label>
+                                <select
+                                    name="priority"
+                                    value={formData.priority}
+                                    onChange={handleFormChange}
+                                >
+                                    <option value="">Select priority</option>
+                                    {PRIORITIES.map(priority => (
+                                        <option key={priority} value={priority}>{priority}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label>Notes</label>
+                                <textarea
+                                    name="notes"
+                                    value={formData.notes}
+                                    onChange={handleFormChange}
+                                    placeholder="Add any additional notes"
+                                />
+                            </div>
+                            <div className="form-actions">
+                                <button className="btn-secondary" onClick={() => setShowModal(false)}>
+                                    Cancel
+                                </button>
+                                <button className="btn-primary" onClick={handleFormSubmit}>
+                                    {editingTask ? 'Update Task' : 'Create Task'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Email Modal */}
+                    <div className={`modal ${showEmailModal ? 'show' : ''}`}>
+                        <div className="modal-content">
+                            <div className="modal-header">Follow-up Email Draft</div>
+                            {emailTask && (
+                                <>
+                                    <div className="email-preview">
+                                        {generateEmailContent(emailTask)}
+                                    </div>
+                                    <div className="form-actions">
+                                        <button className="btn-secondary" onClick={() => setShowEmailModal(false)}>
+                                            Close
+                                        </button>
+                                        <button className="btn-primary" onClick={() => {
+                                            const content = generateEmailContent(emailTask);
+                                            const element = document.createElement('a');
+                                            element.setAttribute('href', 'mailto:?subject=Follow-up: ' + emailTask.task + '&body=' + encodeURIComponent(content));
+                                            element.click();
+                                        }}>
+                                            Open in Email Client
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Export Modal */}
+                    <div className={`modal ${showExportModal ? 'show' : ''}`}>
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                {exportType === 'view' && 'Export View'}
+                                {exportType === 'all' && 'Export All Tasks'}
+                                {exportType === 'owner' && 'Export by Owner'}
+                            </div>
+                            <p style={{ marginBottom: '12px', color: '#666' }}>
+                                {exportData.length} task{exportData.length !== 1 ? 's' : ''} will be exported
+                            </p>
+                            <div className="export-preview">
+                                {exportType === 'owner' ? (
+                                    <div>
+                                        {Object.entries(
+                                            exportData.reduce((acc, task) => {
+                                                if (!acc[task.owner]) acc[task.owner] = [];
+                                                acc[task.owner].push(task);
+                                                return acc;
+                                            }, {})
+                                        ).map(([owner, ownerTasks]) => (
+                                            <div key={owner} style={{ marginBottom: '16px' }}>
+                                                <strong>{owner}</strong>
+                                                <table>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Client</th>
+                                                            <th>Category</th>
+                                                            <th>Task</th>
+                                                            <th>Due Date</th>
+                                                            <th>Status</th>
+                                                            <th>Priority</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {ownerTasks.map(task => (
+                                                            <tr key={task.id}>
+                                                                <td>{task.client}</td>
+                                                                <td>{task.category}</td>
+                                                                <td>{task.task}</td>
+                                                                <td>{task.dueDate}</td>
+                                                                <td>{task.status}</td>
+                                                                <td>{task.priority}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Client</th>
+                                                <th>Category</th>
+                                                <th>Task</th>
+                                                <th>Owner</th>
+                                                <th>Due Date</th>
+                                                <th>Status</th>
+                                                <th>Priority</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {exportData.map(task => (
+                                                <tr key={task.id}>
+                                                    <td>{task.client}</td>
+                                                    <td>{task.category}</td>
+                                                    <td>{task.task}</td>
+                                                    <td>{task.owner}</td>
+                                                    <td>{task.dueDate}</td>
+                                                    <td>{task.status}</td>
+                                                    <td>{task.priority}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                )}
+                            </div>
+                            <div className="form-actions">
+                                <button className="btn-secondary" onClick={() => setShowExportModal(false)}>
+                                    Cancel
+                                </button>
+                                <button className="btn-primary" onClick={downloadCSV}>
+                                    Download CSV
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<TaskManager />);
+    </script>
+</body>
+</html>
