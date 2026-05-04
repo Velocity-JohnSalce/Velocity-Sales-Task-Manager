@@ -13,7 +13,7 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
             background-color: #f0f2f5;
-        }
+        
         .header {
             background: linear-gradient(135deg, #1a3a1a 0%, #2d5a2d 60%, #3d7a3d 100%);
             color: white;
@@ -420,6 +420,38 @@
             };
 
             const filteredTasks = filterTasks();
+            const [sortCol, setSortCol] = useState(null);
+            const [sortDir, setSortDir] = useState(null);
+
+            const handleSort = (col) => {
+                if (sortCol === col) {
+                    if (sortDir === 'asc') { setSortDir('desc'); }
+                    else if (sortDir === 'desc') { setSortCol(null); setSortDir(null); }
+                    else { setSortDir('asc'); }
+                } else {
+                    setSortCol(col);
+                    setSortDir('asc');
+                }
+            };
+
+            const priorityOrder = { 'High': 1, 'Medium': 2, 'Low': 3 };
+            const sortedTasks = sortCol && sortDir ? [...filteredTasks].sort((a, b) => {
+                let aVal = a[sortCol] || '';
+                let bVal = b[sortCol] || '';
+                if (sortCol === 'dueDate') {
+                    aVal = new Date(aVal);
+                    bVal = new Date(bVal);
+                    return sortDir === 'asc' ? aVal - bVal : bVal - aVal;
+                }
+                if (sortCol === 'priority') {
+                    aVal = priorityOrder[aVal] || 99;
+                    bVal = priorityOrder[bVal] || 99;
+                    return sortDir === 'asc' ? aVal - bVal : bVal - aVal;
+                }
+                const cmp = String(aVal).toLowerCase().localeCompare(String(bVal).toLowerCase());
+                return sortDir === 'asc' ? cmp : -cmp;
+            }) : filteredTasks;
+
 
             const handleAddTask = () => {
                 setFormData({
@@ -909,20 +941,20 @@ Date: ${today}`;
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>Client</th>
-                                        <th>Client Owner</th>
-                                        <th>Category</th>
-                                        <th>Task</th>
-                                        <th>VSM Owner</th>
-                                        <th>Due Date</th>
-                                        <th>Status</th>
-                                        <th>Priority</th>
-                                        <th>Notes</th>
+                                        <th style={cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'} onClick={() => handleSort("client")}><span style={{display:'flex',alignItems:'center',color:sortCol==="client"?'#7c3aed':'inherit'}}>Client<span style={{fontSize:9,color:sortCol==="client"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="client"&&sortDir==='asc'?1:0.25}}>▲</span><span style={{opacity:sortCol==="client"&&sortDir==='desc'?1:0.25}}>▼</span></span></span></th>
+                                        <th style={cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'} onClick={() => handleSort("clientOwner")}><span style={{display:'flex',alignItems:'center',color:sortCol==="clientOwner"?'#7c3aed':'inherit'}}>Client Owner<span style={{fontSize:9,color:sortCol==="clientOwner"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="clientOwner"&&sortDir==='asc'?1:0.25}}>▲</span><span style={{opacity:sortCol==="clientOwner"&&sortDir==='desc'?1:0.25}}>▼</span></span></span></th>
+                                        <th style={cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'} onClick={() => handleSort("category")}><span style={{display:'flex',alignItems:'center',color:sortCol==="category"?'#7c3aed':'inherit'}}>Category<span style={{fontSize:9,color:sortCol==="category"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="category"&&sortDir==='asc'?1:0.25}}>▲</span><span style={{opacity:sortCol==="category"&&sortDir==='desc'?1:0.25}}>▼</span></span></span></th>
+                                        <th style={cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'} onClick={() => handleSort("task")}><span style={{display:'flex',alignItems:'center',color:sortCol==="task"?'#7c3aed':'inherit'}}>Task<span style={{fontSize:9,color:sortCol==="task"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="task"&&sortDir==='asc'?1:0.25}}>▲</span><span style={{opacity:sortCol==="task"&&sortDir==='desc'?1:0.25}}>▼</span></span></span></th>
+                                        <th style={cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'} onClick={() => handleSort("owner")}><span style={{display:'flex',alignItems:'center',color:sortCol==="owner"?'#7c3aed':'inherit'}}>VSM Owner<span style={{fontSize:9,color:sortCol==="owner"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="owner"&&sortDir==='asc'?1:0.25}}>▲</span><span style={{opacity:sortCol==="owner"&&sortDir==='desc'?1:0.25}}>▼</span></span></span></th>
+                                        <th style={cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'} onClick={() => handleSort("dueDate")}><span style={{display:'flex',alignItems:'center',color:sortCol==="dueDate"?'#7c3aed':'inherit'}}>Due Date<span style={{fontSize:9,color:sortCol==="dueDate"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="dueDate"&&sortDir==='asc'?1:0.25}}>▲</span><span style={{opacity:sortCol==="dueDate"&&sortDir==='desc'?1:0.25}}>▼</span></span></span></th>
+                                        <th style={cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'} onClick={() => handleSort("status")}><span style={{display:'flex',alignItems:'center',color:sortCol==="status"?'#7c3aed':'inherit'}}>Status<span style={{fontSize:9,color:sortCol==="status"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="status"&&sortDir==='asc'?1:0.25}}>▲</span><span style={{opacity:sortCol==="status"&&sortDir==='desc'?1:0.25}}>▼</span></span></span></th>
+                                        <th style={cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'} onClick={() => handleSort("priority")}><span style={{display:'flex',alignItems:'center',color:sortCol==="priority"?'#7c3aed':'inherit'}}>Priority<span style={{fontSize:9,color:sortCol==="priority"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="priority"&&sortDir==='asc'?1:0.25}}>▲</span><span style={{opacity:sortCol==="priority"&&sortDir==='desc'?1:0.25}}>▼</span></span></span></th>
+                                        <th style={cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'} onClick={() => handleSort("notes")}><span style={{display:'flex',alignItems:'center',color:sortCol==="notes"?'#7c3aed':'inherit'}}>Notes<span style={{fontSize:9,color:sortCol==="notes"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="notes"&&sortDir==='asc'?1:0.25}}>▲</span><span style={{opacity:sortCol==="notes"&&sortDir==='desc'?1:0.25}}>▼</span></span></span></th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {filteredTasks.map(task => (
+                                    {sortedTasks.map(task => (
                                         <tr key={task.id}>
                                             <td>{task.client}</td>
                                             <td>
