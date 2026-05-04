@@ -343,11 +343,11 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // ââ Supabase Cloud Backend âââââââââââââââââââââââââââââââââââââââââ
+        // -- Supabase Cloud Backend -----------------------------------------
         const _SB_URL = 'https://tmzlytjwfhiciwrnmecy.supabase.co';
         const _SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRtemx5dGp3ZmhpY2l3cm5tZWN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4ODk0OTMsImV4cCI6MjA5MzQ2NTQ5M30.4FfyCv5YCnxRbI57epWTfbKb_iSRzY9WIKtAH6rkbpI';
         const sbClient = supabase.createClient(_SB_URL, _SB_KEY);
-        // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+        // -------------------------------------------------------------------
 
         const CLIENTS = ['All Clients', 'World Wide Snacks', 'Sunrise Organics', 'Cerebelly', 'Premier Foods'];
         const STATUSES = ['In Progress', 'Pending', 'Complete', 'On Hold', 'Info/Update'];
@@ -819,7 +819,7 @@ Date: ${today}`;
                     <div className="header">
                         <div className="header-left">
                             <h1>Velocity Task Manager</h1>
-                            <p>Velocity Sales & Marketing â Live Tasks</p>
+                            <p>Velocity Sales & Marketing &mdash; Live Tasks</p>
                         </div>
                         <div className="header-right">
                             <div className="header-email">john.salce@velocitysalesmanagement.net</div>
@@ -1002,15 +1002,15 @@ Date: ${today}`;
                             <table>
                                 <thead>
                                     <tr>
-                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("client")}><span style={{display:'flex',alignItems:'center',color:sortCol==="client"?'#7c3aed':'inherit'}}>Client<span style={{fontSize:9,color:sortCol==="client"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="client"&&sortDir==='asc'?1:0.25}}>â²</span><span style={{opacity:sortCol==="client"&&sortDir==='desc'?1:0.25}}>â¼</span></span></span></th>
-                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("clientOwner")}><span style={{display:'flex',alignItems:'center',color:sortCol==="clientOwner"?'#7c3aed':'inherit'}}>Client Owner<span style={{fontSize:9,color:sortCol==="clientOwner"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="clientOwner"&&sortDir==='asc'?1:0.25}}>â²</span><span style={{opacity:sortCol==="clientOwner"&&sortDir==='desc'?1:0.25}}>â¼</span></span></span></th>
-                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("category")}><span style={{display:'flex',alignItems:'center',color:sortCol==="category"?'#7c3aed':'inherit'}}>Category<span style={{fontSize:9,color:sortCol==="category"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="category"&&sortDir==='asc'?1:0.25}}>â²</span><span style={{opacity:sortCol==="category"&&sortDir==='desc'?1:0.25}}>â¼</span></span></span></th>
-                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("task")}><span style={{display:'flex',alignItems:'center',color:sortCol==="task"?'#7c3aed':'inherit'}}>Task<span style={{fontSize:9,color:sortCol==="task"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="task"&&sortDir==='asc'?1:0.25}}>â²</span><span style={{opacity:sortCol==="task"&&sortDir==='desc'?1:0.25}}>â¼</span></span></span></th>
-                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("owner")}><span style={{display:'flex',alignItems:'center',color:sortCol==="owner"?'#7c3aed':'inherit'}}>VSM Owner<span style={{fontSize:9,color:sortCol==="owner"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="owner"&&sortDir==='asc'?1:0.25}}>â²</span><span style={{opacity:sortCol==="owner"&&sortDir==='desc'?1:0.25}}>â¼</span></span></span></th>
-                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("dueDate")}><span style={{display:'flex',alignItems:'center',color:sortCol==="dueDate"?'#7c3aed':'inherit'}}>Due Date<span style={{fontSize:9,color:sortCol==="dueDate"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="dueDate"&&sortDir==='asc'?1:0.25}}>â²</span><span style={{opacity:sortCol==="dueDate"&&sortDir==='desc'?1:0.25}}>â¼</span></span></span></th>
-                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("status")}><span style={{display:'flex',alignItems:'center',color:sortCol==="status"?'#7c3aed':'inherit'}}>Status<span style={{fontSize:9,color:sortCol==="status"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="status"&&sortDir==='asc'?1:0.25}}>â²</span><span style={{opacity:sortCol==="status"&&sortDir==='desc'?1:0.25}}>â¼</span></span></span></th>
-                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("priority")}><span style={{display:'flex',alignItems:'center',color:sortCol==="priority"?'#7c3aed':'inherit'}}>Priority<span style={{fontSize:9,color:sortCol==="priority"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="priority"&&sortDir==='asc'?1:0.25}}>â²</span><span style={{opacity:sortCol==="priority"&&sortDir==='desc'?1:0.25}}>â¼</span></span></span></th>
-                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("notes")}><span style={{display:'flex',alignItems:'center',color:sortCol==="notes"?'#7c3aed':'inherit'}}>Notes<span style={{fontSize:9,color:sortCol==="notes"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="notes"&&sortDir==='asc'?1:0.25}}>â²</span><span style={{opacity:sortCol==="notes"&&sortDir==='desc'?1:0.25}}>â¼</span></span></span></th>
+                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("client")}><span style={{display:'flex',alignItems:'center',color:sortCol==="client"?'#7c3aed':'inherit'}}>Client<span style={{fontSize:9,color:sortCol==="client"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="client"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="client"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
+                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("clientOwner")}><span style={{display:'flex',alignItems:'center',color:sortCol==="clientOwner"?'#7c3aed':'inherit'}}>Client Owner<span style={{fontSize:9,color:sortCol==="clientOwner"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="clientOwner"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="clientOwner"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
+                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("category")}><span style={{display:'flex',alignItems:'center',color:sortCol==="category"?'#7c3aed':'inherit'}}>Category<span style={{fontSize:9,color:sortCol==="category"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="category"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="category"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
+                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("task")}><span style={{display:'flex',alignItems:'center',color:sortCol==="task"?'#7c3aed':'inherit'}}>Task<span style={{fontSize:9,color:sortCol==="task"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="task"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="task"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
+                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("owner")}><span style={{display:'flex',alignItems:'center',color:sortCol==="owner"?'#7c3aed':'inherit'}}>VSM Owner<span style={{fontSize:9,color:sortCol==="owner"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="owner"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="owner"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
+                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("dueDate")}><span style={{display:'flex',alignItems:'center',color:sortCol==="dueDate"?'#7c3aed':'inherit'}}>Due Date<span style={{fontSize:9,color:sortCol==="dueDate"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="dueDate"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="dueDate"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
+                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("status")}><span style={{display:'flex',alignItems:'center',color:sortCol==="status"?'#7c3aed':'inherit'}}>Status<span style={{fontSize:9,color:sortCol==="status"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="status"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="status"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
+                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("priority")}><span style={{display:'flex',alignItems:'center',color:sortCol==="priority"?'#7c3aed':'inherit'}}>Priority<span style={{fontSize:9,color:sortCol==="priority"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="priority"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="priority"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
+                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("notes")}><span style={{display:'flex',alignItems:'center',color:sortCol==="notes"?'#7c3aed':'inherit'}}>Notes<span style={{fontSize:9,color:sortCol==="notes"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="notes"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="notes"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -1021,7 +1021,7 @@ Date: ${today}`;
                                             <td>
                                                 <div className="field-with-dropdown" onClick={(e) => { e.stopPropagation(); setDropdownPopup({ taskId: task.id, field: 'clientOwner' }); }}>
                                                     <span style={{ color: `#${getColorForValue('supplier-owner', task.clientOwner)}`, fontWeight: '600' }}>{task.clientOwner}</span>
-                                                    <span className="dropdown-arrow">â¼</span>
+                                                    <span className="dropdown-arrow">&#x25BC;</span>
                                                 </div>
                                                 {dropdownPopup?.taskId === task.id && dropdownPopup?.field === 'clientOwner' && (
                                                     <div className="dropdown-popup">
@@ -1076,7 +1076,7 @@ Date: ${today}`;
                                             <td>
                                                 <div className="field-with-dropdown" onClick={(e) => { e.stopPropagation(); setDropdownPopup({ taskId: task.id, field: 'owner' }); }}>
                                                     <span className="owner-name" data-owner={task.owner}>{task.owner}</span>
-                                                    <span className="dropdown-arrow">â¼</span>
+                                                    <span className="dropdown-arrow">&#x25BC;</span>
                                                 </div>
                                                 {dropdownPopup?.taskId === task.id && dropdownPopup?.field === 'owner' && (
                                                     <div className="dropdown-popup">
@@ -1109,7 +1109,7 @@ Date: ${today}`;
                                             <td>
                                                 <div className="field-with-dropdown" onClick={(e) => { e.stopPropagation(); setDropdownPopup({ taskId: task.id, field: 'status' }); }}>
                                                     <span className={`status-badge ${getStatusClass(task.status)}`}>{task.status}</span>
-                                                    <span className="dropdown-arrow">â¼</span>
+                                                    <span className="dropdown-arrow">&#x25BC;</span>
                                                 </div>
                                                 {dropdownPopup?.taskId === task.id && dropdownPopup?.field === 'status' && (
                                                     <div className="dropdown-popup">
@@ -1128,7 +1128,7 @@ Date: ${today}`;
                                             <td>
                                                 <div className="field-with-dropdown" onClick={(e) => { e.stopPropagation(); setDropdownPopup({ taskId: task.id, field: 'priority' }); }}>
                                                     <span className={getPriorityClass(task.priority)}>{task.priority}</span>
-                                                    <span className="dropdown-arrow">â¼</span>
+                                                    <span className="dropdown-arrow">&#x25BC;</span>
                                                 </div>
                                                 {dropdownPopup?.taskId === task.id && dropdownPopup?.field === 'priority' && (
                                                     <div className="dropdown-popup">
@@ -1161,10 +1161,10 @@ Date: ${today}`;
                                             <td>
                                                 <div className="action-icons">
                                                     <button className="icon-btn" onClick={() => handleEmailTask(task)} title="Email">
-                                                        âï¸
+                                                        &#x2709;&#xFE0F;
                                                     </button>
                                                     <button className="icon-btn" onClick={() => handleDeleteTask(task.id)} title="Delete">
-                                                        ðï¸
+                                                        &#x1F5D1;&#xFE0F;
                                                     </button>
                                                 </div>
                                             </td>
@@ -1358,7 +1358,7 @@ Date: ${today}`;
                                                     <span className="owner-task-count">{ownerTasks.length} task{ownerTasks.length !== 1 ? 's' : ''}</span>
                                                 </div>
                                                 <span style={{ fontSize: '18px', color: '#999' }}>
-                                                    {isExpanded ? 'â¼' : 'â¶'}
+                                                    {isExpanded ? '&#x25BC;' : '&#x25B6;'}
                                                 </span>
                                             </div>
                                             {isExpanded && ownerTasks.length > 0 && (
@@ -1393,12 +1393,12 @@ Date: ${today}`;
                                                             Email Draft
                                                         </div>
                                                         <div style={{ backgroundColor: 'white', padding: '12px', borderRadius: '4px', fontSize: '13px', lineHeight: '1.6', fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordWrap: 'break-word', maxHeight: '300px', overflowY: 'auto', border: '1px solid #ddd' }}>
-                                                            {`Subject: Your Assigned Tasks\n\nHi ${owner.split(' ')[0]},\n\nHere is a summary of your assigned tasks:\n\n${ownerTasks.map(t => `â¢ ${t.task}\n  Client: ${t.client} | Status: ${t.status} | Priority: ${t.priority} | Due: ${t.dueDate}`).join('\n\n')}\n\n\nPlease let me know if you have any questions.\n\nBest regards,\nJohn Salce\njohn.salce@velocitysalesmanagement.net`}
+                                                            {`Subject: Your Assigned Tasks\n\nHi ${owner.split(' ')[0]},\n\nHere is a summary of your assigned tasks:\n\n${ownerTasks.map(t => `&bull; ${t.task}\n  Client: ${t.client} | Status: ${t.status} | Priority: ${t.priority} | Due: ${t.dueDate}`).join('\n\n')}\n\n\nPlease let me know if you have any questions.\n\nBest regards,\nJohn Salce\njohn.salce@velocitysalesmanagement.net`}
                                                         </div>
                                                         <button
                                                             className="owner-email-btn"
                                                             onClick={() => {
-                                                                const emailContent = `Subject: Your Assigned Tasks\n\nHi ${owner.split(' ')[0]},\n\nHere is a summary of your assigned tasks:\n\n${ownerTasks.map(t => `â¢ ${t.task}\n  Client: ${t.client} | Status: ${t.status} | Priority: ${t.priority} | Due: ${t.dueDate}`).join('\n\n')}\n\n\nPlease let me know if you have any questions.\n\nBest regards,\nJohn Salce\njohn.salce@velocitysalesmanagement.net`;
+                                                                const emailContent = `Subject: Your Assigned Tasks\n\nHi ${owner.split(' ')[0]},\n\nHere is a summary of your assigned tasks:\n\n${ownerTasks.map(t => `&bull; ${t.task}\n  Client: ${t.client} | Status: ${t.status} | Priority: ${t.priority} | Due: ${t.dueDate}`).join('\n\n')}\n\n\nPlease let me know if you have any questions.\n\nBest regards,\nJohn Salce\njohn.salce@velocitysalesmanagement.net`;
                                                                 navigator.clipboard.writeText(emailContent);
                                                                 alert('Email draft copied to clipboard!');
                                                             }}
