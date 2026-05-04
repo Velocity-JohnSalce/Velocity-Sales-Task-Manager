@@ -8,6 +8,7 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -333,6 +334,12 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
+        // ── Supabase Cloud Backend ─────────────────────────────────────────
+        const _SB_URL = 'https://tmzlytjwfhiciwrnmecy.supabase.co';
+        const _SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRtemx5dGp3ZmhpY2l3cm5tZWN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4ODk0OTMsImV4cCI6MjA5MzQ2NTQ5M30.4FfyCv5YCnxRbI57epWTfbKb_iSRzY9WIKtAH6rkbpI';
+        const sbClient = supabase.createClient(_SB_URL, _SB_KEY);
+        // ───────────────────────────────────────────────────────────────────
+
         const CLIENTS = ['All Clients', 'World Wide Snacks', 'Sunrise Organics', 'Cerebelly', 'Premier Foods'];
         const STATUSES = ['In Progress', 'Pending', 'Complete', 'On Hold', 'Info/Update'];
         const PRIORITIES = ['High', 'Medium', 'Low'];
@@ -380,16 +387,58 @@
                 priority: '',
                 notes: ''
             });
-
+            // Load tasks from Supabase on mount
             useEffect(() => {
-                const savedTasks = localStorage.getItem('velocityTasks');
-                if (savedTasks) {
-                    setTasks(JSON.parse(savedTasks));
-                }
+                const loadTasks = async () => {
+                    try {
+                        const { data, error } = await sbClient
+                            .from('tasks')
+                            .select('*')
+                            .order('created_at', { ascending: true });
+                        if (!error && data && data.length > 0) {
+                            setTasks(data.map(t => ({
+                                id: t.id,
+                                client: t.client || '',
+                                clientOwner: t.clientOwner || '',
+                                category: t.category || '',
+                                task: t.task || '',
+                                owner: t.owner || '',
+                                dueDate: t.dueDate || '',
+                                status: t.status || 'Pending',
+                                priority: t.priority || 'Medium',
+                                notes: t.notes || ''
+                            })));
+                        }
+                    } catch(e) { console.error('Supabase load error:', e); }
+                };
+                loadTasks();
             }, []);
-
+            // Sync tasks to Supabase on every change (debounced)
             useEffect(() => {
-                localStorage.setItem('velocityTasks', JSON.stringify(tasks));
+                if (tasks.length === 0) return;
+                const syncTasks = async () => {
+                    try {
+                        const taskRows = tasks.map(t => ({
+                            id: t.id,
+                            client: t.client || '',
+                            "clientOwner": t.clientOwner || '',
+                            category: t.category || '',
+                            task: t.task || '',
+                            owner: t.owner || '',
+                            "dueDate": t.dueDate || '',
+                            status: t.status || 'Pending',
+                            priority: t.priority || 'Medium',
+                            notes: t.notes || ''
+                        }));
+                        await sbClient.from('tasks').upsert(taskRows, { onConflict: 'id' });
+                        const currentIds = tasks.map(t => t.id);
+                        if (currentIds.length > 0) {
+                            await sbClient.from('tasks').delete().not('id', 'in', `(${currentIds.join(',')})`);
+                        }
+                    } catch(e) { console.error('Supabase sync error:', e); }
+                };
+                const timer = setTimeout(syncTasks, 800);
+                return () => clearTimeout(timer);
             }, [tasks]);
 
             useEffect(() => {
