@@ -1057,7 +1057,7 @@ Date: ${today}`;
                                             </td>
                                             <td>
                                                 <div className="field-with-dropdown" onClick={(e) => { e.stopPropagation(); setDropdownPopup({ taskId: task.id, field: 'owner' }); }}>
-                                                    <span className="owner-name" data-owner={task.owner}>{task.owner}</span>
+                                                    <span className="owner-name" data-owner={task.owner} style={{ color: `#${getColorForValue('owner', task.owner)}` }}>{task.owner}</span>
                                                     <span className="dropdown-arrow">&#x25BC;</span>
                                                 </div>
                                                 {dropdownPopup?.taskId === task.id && dropdownPopup?.field === 'owner' && (
