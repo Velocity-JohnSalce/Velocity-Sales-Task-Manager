@@ -199,6 +199,12 @@
         .filter-btn.active[data-filter-type="supplier-owner"][data-supplier-owner="Alyson Colgan"] { background:#db2777; border-color:#db2777; }
         .filter-btn.active[data-filter-type="supplier-owner"][data-supplier-owner="Brittany Albert"] { background:#db2777; border-color:#db2777; }
         .filter-btn.active[data-filter-type="supplier-owner"][data-supplier-owner="Josh McCutchen"] { background:#ea580c; border-color:#ea580c; }
+        .filter-btn[data-filter-type="supplier-owner"][data-supplier-owner="Janice Greenwald"] { color: #2563eb; }
+        .filter-btn.active[data-filter-type="supplier-owner"][data-supplier-owner="Janice Greenwald"] { background:#2563eb; border-color:#2563eb; }
+        .filter-btn[data-filter-type="supplier-owner"][data-supplier-owner="Jodie Wing"] { color: #ec4899; }
+        .filter-btn.active[data-filter-type="supplier-owner"][data-supplier-owner="Jodie Wing"] { background:#ec4899; border-color:#ec4899; }
+        .filter-btn[data-filter-type="supplier-owner"][data-supplier-owner="Brandon Dvorak"] { color: #ec4899; }
+        .filter-btn.active[data-filter-type="supplier-owner"][data-supplier-owner="Brandon Dvorak"] { background:#ec4899; border-color:#ec4899; }
         .clear-pill {
             padding: 6px 14px; border: 2px dashed #ccc; background: white;
             cursor: pointer; border-radius: 20px; font-size: 12px; color: #888;
@@ -344,7 +350,7 @@
         const STATUSES = ['In Progress', 'Pending', 'Complete', 'On Hold', 'Info/Update'];
         const PRIORITIES = ['High', 'Medium', 'Low'];
         const OWNERS = ['Scott Gilroy', 'Rob Levit', 'Jen Wagoner', 'Denise Chmielewski', 'Dustin Anderson', 'Ken Sorensen', 'Ashley Jones', 'Carrie Ellis', 'Brooke Jones', 'Adam Levit', 'John Salce', 'Julie Ann Hackett', 'Matt Bennett', 'Haley Saffel', 'April McHone', 'N/A'];
-        const SUPPLIER_OWNERS = ['Danny Pollak', 'Erin Bellavance', 'Hannah Deupree', 'Alyson Colgan', 'Brittany Albert', 'Josh McCutchen'];
+        const SUPPLIER_OWNERS = ['Danny Pollak', 'Erin Bellavance', 'Hannah Deupree', 'Alyson Colgan', 'Brittany Albert', 'Josh McCutchen', 'Janice Greenwald', 'Jodie Wing', 'Brandon Dvorak'];
 
         const getSupplierOwnersForClient = (client) => {
             const map = {
@@ -673,7 +679,10 @@ Date: ${today}`;
                         'Hannah Deupree': 'eab308',
                         'Alyson Colgan': 'ec4899',
                         'Brittany Albert': 'ec4899',
-                        'Josh McCutchen': 'ea580c'
+                        'Josh McCutchen': 'ea580c',
+                        'Janice Greenwald': '2563eb',
+                        'Jodie Wing': 'ec4899',
+                        'Brandon Dvorak': 'ec4899'
                     }
                 };
                 return colorMap[field]?.[value] || '000000';
