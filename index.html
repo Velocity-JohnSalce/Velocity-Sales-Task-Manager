@@ -708,51 +708,33 @@ Date: ${today}`;
                 let dataToExport = exportData;
 
                 const processSheet = (tasksArray, sheetName) => {
-                    const sheetData = [];
-
-                    // Add header row
-                    const headerRow = {
-                        'Client': { v: 'Client', s: { font: { bold: true }, fill: { fgColor: { rgb: 'f5f5f5' } } } },
-                        'Client Owner': { v: 'Client Owner', s: { font: { bold: true }, fill: { fgColor: { rgb: 'f5f5f5' } } } },
-                        'Category': { v: 'Category', s: { font: { bold: true }, fill: { fgColor: { rgb: 'f5f5f5' } } } },
-                        'Task': { v: 'Task', s: { font: { bold: true }, fill: { fgColor: { rgb: 'f5f5f5' } } } },
-                        'VSM Owner': { v: 'VSM Owner', s: { font: { bold: true }, fill: { fgColor: { rgb: 'f5f5f5' } } } },
-                        'Due Date': { v: 'Due Date', s: { font: { bold: true }, fill: { fgColor: { rgb: 'f5f5f5' } } } },
-                        'Status': { v: 'Status', s: { font: { bold: true }, fill: { fgColor: { rgb: 'f5f5f5' } } } },
-                        'Priority': { v: 'Priority', s: { font: { bold: true }, fill: { fgColor: { rgb: 'f5f5f5' } } } },
-                        'Notes': { v: 'Notes', s: { font: { bold: true }, fill: { fgColor: { rgb: 'f5f5f5' } } } }
-                    };
-                    sheetData.push(headerRow);
-
-                    // Add data rows with formatting
+                    const headers = ['Client', 'Client Owner', 'Category', 'Task', 'VSM Owner', 'Due Date', 'Status', 'Priority', 'Notes'];
+                    const rows = [headers];
                     tasksArray.forEach(task => {
-                        const row = {
-                            'Client': createStyledCell(task.client, 'client'),
-                            'Client Owner': createStyledCell(task.clientOwner, 'supplier-owner'),
-                            'Category': { v: task.category },
-                            'Task': { v: task.task },
-                            'VSM Owner': createStyledCell(task.owner, 'owner'),
-                            'Due Date': { v: task.dueDate },
-                            'Status': createStyledCell(task.status, 'status'),
-                            'Priority': createStyledCell(task.priority, 'priority'),
-                            'Notes': { v: task.notes }
-                        };
-                        sheetData.push(row);
+                        rows.push([
+                            task.client || '',
+                            task.clientOwner || '',
+                            task.category || '',
+                            task.task || '',
+                            task.owner || '',
+                            task.dueDate || '',
+                            task.status || '',
+                            task.priority || '',
+                            task.notes || ''
+                        ]);
                     });
-
-                    const ws = XLSX.utils.json_to_sheet(sheetData, { header: 1 });
+                    const ws = XLSX.utils.aoa_to_sheet(rows);
                     ws['!cols'] = [
                         { wch: 18 },
                         { wch: 18 },
                         { wch: 15 },
-                        { wch: 25 },
+                        { wch: 40 },
                         { wch: 18 },
                         { wch: 15 },
                         { wch: 15 },
                         { wch: 12 },
-                        { wch: 30 }
+                        { wch: 40 }
                     ];
-
                     XLSX.utils.book_append_sheet(wb, ws, sheetName);
                 };
 
