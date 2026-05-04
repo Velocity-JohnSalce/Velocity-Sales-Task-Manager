@@ -352,7 +352,7 @@
         const CLIENTS = ['All Clients', 'World Wide Snacks', 'Sunrise Organics', 'Cerebelly', 'Premier Foods'];
         const STATUSES = ['In Progress', 'Pending', 'Complete', 'On Hold', 'Info/Update'];
         const PRIORITIES = ['High', 'Medium', 'Low'];
-        const OWNERS = ['Scott Gilroy', 'Rob Levit', 'Jen Wagoner', 'Denise Chmielewski', 'Dustin Anderson', 'Ken Sorensen', 'Ashley Jones', 'Carrie Ellis', 'Brooke Jones', 'Adam Levit', 'John Salce', 'Julie Ann Hackett', 'Matt Bennett', 'Haley Saffel', 'April McHone', 'N/A'];
+        const OWNERS = ['Scott Gilroy', 'Rob Levit', 'Jen Wagoner', 'Denise Chmielewski', 'Dustin Anderson', 'Ken Sorensen', 'Ashley Jones', 'Carrie Ellis', 'Brooke Jones', 'Adam Levit', 'John Salce', 'Julie Ann Hackett', 'Matt Bennett', 'Haley Saffel', 'April McHone', 'Patrice Leannais', 'N/A'];
         const SUPPLIER_OWNERS = ['Danny Pollak', 'Erin Bellavance', 'Hannah Deupree', 'Alyson Colgan', 'Brittany Albert', 'Josh McCutchen', 'Janice Greenwald', 'Jodie Wing', 'Brandon Dvorak'];
 
         const getSupplierOwnersForClient = (client) => {
@@ -663,6 +663,7 @@ Date: ${today}`;
                         'Matt Bennett': '166534',
                         'Haley Saffel': '166534',
                         'April McHone': '166534',
+                        'Patrice Leannais': '166534',
                         'N/A': '166534'
                     },
                     'status': {
@@ -752,7 +753,7 @@ Date: ${today}`;
                         processSheet(ownerGroups[owner], owner);
                     });
                 } else {
-                    processSheet(dataToExport, 'Tasks');
+                    processSheet(dataToExport, 'Tasks')
                 }
 
                 XLSX.writeFile(wb, `tasks-export-${new Date().toISOString().split('T')[0]}.xlsx`);
