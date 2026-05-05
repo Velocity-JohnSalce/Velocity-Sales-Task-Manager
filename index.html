@@ -1,4 +1,4 @@
- <!DOCTYPE html> 
+X <!DOCTYPE html> 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -354,6 +354,7 @@
         const PRIORITIES = ['High', 'Medium', 'Low'];
         const OWNERS = ['Scott Gilroy', 'Rob Levit', 'Jen Wagoner', 'Denise Chmielewski', 'Dustin Anderson', 'Ken Sorensen', 'Ashley Jones', 'Carrie Ellis', 'Brooke Jones', 'Adam Levit', 'John Salce', 'Julie Ann Hackett', 'Matt Bennett', 'Haley Saffel', 'April McHone', 'Patrice Leannais', 'N/A'];
         const SUPPLIER_OWNERS = ['Danny Pollak', 'Erin Bellavance', 'Hannah Deupree', 'Alyson Colgan', 'Brittany Albert', 'Josh McCutchen', 'Janice Greenwald', 'Jodie Wing', 'Brandon Dvorak'];
+        const RETAILERS = ['Walmart', 'Target', 'Kroger', 'Costco', 'Whole Foods', 'Amazon', 'Sprouts', 'Publix', 'HEB', 'Wegmans', 'Other'];
 
         const getSupplierOwnersForClient = (client) => {
             const map = {
@@ -372,6 +373,7 @@
             const [selectedPriorities, setSelectedPriorities] = useState([]);
             const [selectedOwners, setSelectedOwners] = useState([]);
             const [selectedSupplierOwners, setSelectedSupplierOwners] = useState([]);
+            const [selectedRetailers, setSelectedRetailers] = useState([]);
             const [searchTerm, setSearchTerm] = useState('');
             const [showModal, setShowModal] = useState(false);
             const [showEmailModal, setShowEmailModal] = useState(false);
@@ -394,7 +396,9 @@
                 dueDate: '',
                 status: '',
                 priority: '',
-                notes: ''
+                notes: '',
+                retailer: formData.retailer,
+                retailer: ''
             });
             // Load tasks from Supabase on mount
             useEffect(() => {
@@ -415,7 +419,8 @@
                                 dueDate: t.dueDate || '',
                                 status: t.status || 'Pending',
                                 priority: t.priority || 'Medium',
-                                notes: t.notes || ''
+                                notes: t.notes || '',
+                            retailer: t.retailer || ''
                             })));
                         }
                     } catch(e) { console.error('Supabase load error:', e); }
@@ -437,7 +442,8 @@
                             "dueDate": t.dueDate || '',
                             status: t.status || 'Pending',
                             priority: t.priority || 'Medium',
-                            notes: t.notes || ''
+                            notes: t.notes || '',
+                            retailer: t.retailer || ''
                         }));
                         await sbClient.from('tasks').upsert(taskRows, { onConflict: 'id' });
                         const currentIds = tasks.map(t => t.id);
@@ -468,12 +474,13 @@
                     const ownerMatch = selectedOwners.length === 0 || selectedOwners.includes(task.owner);
                     const supplierOwnerMatch = selectedSupplierOwners.length === 0 ||
                         getSupplierOwnersForClient(task.client).some(so => selectedSupplierOwners.includes(so));
+                    const retailerMatch = selectedRetailers.length === 0 || selectedRetailers.includes(task.retailer);
                     const searchMatch = searchTerm === '' ||
                         task.task.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         task.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         task.notes.toLowerCase().includes(searchTerm.toLowerCase());
 
-                    return clientMatch && statusMatch && priorityMatch && ownerMatch && supplierOwnerMatch && searchMatch;
+                    return clientMatch && statusMatch && priorityMatch && ownerMatch && supplierOwnerMatch && retailerMatch && searchMatch;
                 });
             };
 
@@ -949,6 +956,36 @@ Date: ${today}`;
                                     )}
                                 </div>
                             </div>
+<div className="filter-group">
+                                <div className="filter-label">Retailer</div>
+                                <div className="filter-options">
+                                    {RETAILERS.map(retailer => (
+                                        <button
+                                            key={retailer}
+                                            data-filter-type="retailer"
+                                            data-retailer={retailer}
+                                            className={`filter-btn ${selectedRetailers.includes(retailer) ? 'active' : ''}`}
+                                            onClick={() => {
+                                                setSelectedRetailers(prev =>
+                                                    prev.includes(retailer)
+                                                        ? prev.filter(o => o !== retailer)
+                                                        : [...prev, retailer]
+                                                );
+                                            }}
+                                        >
+                                            {retailer}
+                                        </button>
+                                    ))}
+                                    {selectedRetailers.length > 0 && (
+                                        <button
+                                            className="clear-pill"
+                                            onClick={() => setSelectedRetailers([])}
+                                        >
+                                            Clear
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
                         </div>
 
                         <div className="search-export">
@@ -995,6 +1032,7 @@ Date: ${today}`;
                                         <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("status")}><span style={{display:'flex',alignItems:'center',color:sortCol==="status"?'#7c3aed':'inherit'}}>Status<span style={{fontSize:9,color:sortCol==="status"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="status"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="status"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
                                         <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("priority")}><span style={{display:'flex',alignItems:'center',color:sortCol==="priority"?'#7c3aed':'inherit'}}>Priority<span style={{fontSize:9,color:sortCol==="priority"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="priority"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="priority"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
                                         <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("notes")}><span style={{display:'flex',alignItems:'center',color:sortCol==="notes"?'#7c3aed':'inherit'}}>Notes<span style={{fontSize:9,color:sortCol==="notes"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="notes"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="notes"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
+                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("retailer")}><span style={{display:'flex',alignItems:'center',color:sortCol==="retailer"?'#7c3aed':'inherit'}}>Retailer<span style={{fontSize:9,color:sortCol==="retailer"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="retailer"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="retailer"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -1142,6 +1180,26 @@ Date: ${today}`;
                                                     <div className="notes-display">{task.notes}</div>
                                                 )}
                                             </td>
+<td>
+                                                <div className="field-with-dropdown" onClick={(e) => { e.stopPropagation(); setDropdownPopup({ taskId: task.id, field: 'retailer' }); }}>
+                                                    <span className={`retailer-badge ${getRetailerClass(task.retailer)}`}>{task.retailer}</span>
+                                                    <span className="dropdown-arrow">&#x25BC;</span>
+                                                </div>
+                                                {dropdownPopup?.taskId === task.id && dropdownPopup?.field === 'retailer' && (
+                                                    <div className="dropdown-popup">
+                                                        {RETAILERS.map(retailer => (
+                                                            <div
+                                                                key={retailer}
+                                                                className="dropdown-popup-item"
+                                                                onClick={() => handleDropdownSelect(task.id, 'retailer', retailer)}
+                                                            >
+                                                                {retailer}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </td>
+
                                             <td>
                                                 <div className="action-icons">
                                                     <button className="icon-btn" onClick={() => handleEmailTask(task)} title="Email">
@@ -1266,6 +1324,19 @@ Date: ${today}`;
                                     onChange={handleFormChange}
                                     placeholder="Add any additional notes"
                                 />
+                            </div>
+<div className="form-group">
+                                <label>Retailer</label>
+                                <select
+                                    name="retailer"
+                                    value={formData.retailer}
+                                    onChange={handleFormChange}
+                                >
+                                    <option value="">Select retailer</option>
+                                    {RETAILERS.map(retailer => (
+                                        <option key={retailer} value={retailer}>{retailer}</option>
+                                    ))}
+                                </select>
                             </div>
                             <div className="form-actions">
                                 <button className="btn-secondary" onClick={() => setShowModal(false)}>
