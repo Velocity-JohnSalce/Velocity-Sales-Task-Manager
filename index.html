@@ -1,4 +1,4 @@
- <!DOCTYPE html> 
+<!DOCTYPE html> 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -12,7 +12,7 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sa ns-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
             background-color: #f0f2f5;
         
         .header {
@@ -473,7 +473,7 @@
                     const ownerMatch = selectedOwners.length === 0 || selectedOwners.includes(task.owner);
                     const supplierOwnerMatch = selectedSupplierOwners.length === 0 ||
                         getSupplierOwnersForClient(task.client).some(so => selectedSupplierOwners.includes(so));
-                    const retailerMatch = selectedRetailers.length === 0 || selectedRetailers.includes((task?.retailer) || '');
+                    const retailerMatch = selectedRetailers.length === 0 || selectedRetailers.includes(task?.retailer);
                     const searchMatch = searchTerm === '' ||
                         task.task.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         task.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -1182,7 +1182,7 @@ Date: ${today}`;
                                             </td>
 <td>
                                                 <div className="field-with-dropdown" onClick={(e) => { e.stopPropagation(); setDropdownPopup({ taskId: task.id, field: 'retailer' }); }}>
-                                                    <span className={`retailer-badge ${getRetailerClass((task?.retailer) || '')}`}>{(task?.retailer) || ''}</span>
+                                                    <span className={`retailer-badge ${getRetailerClass(task?.retailer)}`}>{task?.retailer}</span>
                                                     <span className="dropdown-arrow">&#x25BC;</span>
                                                 </div>
                                                 {dropdownPopup?.taskId === task.id && dropdownPopup?.field === 'retailer' && (
@@ -1549,7 +1549,8 @@ Date: ${today}`;
                                                 <tr key={task.id}>
                                                     <td>{task.client}</td>
                                                     <td>{task.category}</td>
-Fix: Remove duplicate retailer initialization from formData state                                                    <td>{task.owner}</td>
+                                                    <td>{task.task}</td>
+                                                    <td>{task.owner}</td>
                                                     <td>{task.dueDate}</td>
                                                     <td>{task.status}</td>
                                                     <td>{task.priority}</td>
@@ -1577,4 +1578,4 @@ Fix: Remove duplicate retailer initialization from formData state               
         root.render(<TaskManager />);
     </script>
 </body>
-                                                    </html>
+</html>
