@@ -1,4 +1,4 @@
- <!DOCTYPE html> 
+<!DOCTYPE html> 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -397,7 +397,6 @@
                 status: '',
                 priority: '',
                 notes: '',
-                retailer: formData.retailer,
                 retailer: ''
             });
             // Load tasks from Supabase on mount
@@ -1550,8 +1549,7 @@ Date: ${today}`;
                                                 <tr key={task.id}>
                                                     <td>{task.client}</td>
                                                     <td>{task.category}</td>
-                                                    <td>{task.task}</td>
-                                                    <td>{task.owner}</td>
+Fix: Remove duplicate retailer initialization from formData state                                                    <td>{task.owner}</td>
                                                     <td>{task.dueDate}</td>
                                                     <td>{task.status}</td>
                                                     <td>{task.priority}</td>
