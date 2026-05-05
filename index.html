@@ -474,6 +474,1587 @@
                     const ownerMatch = selectedOwners.length === 0 || selectedOwners.includes(task.owner);
                     const supplierOwnerMatch = selectedSupplierOwners.length === 0 ||
                         getSupplierOwnersForClient(task.client).some(so => selectedSupplierOwners.includes(so));
+                    const retailerMatch = selectedRetailers.length === 0 || selectedRetailers.includes(task.retailer || '');
+                    const searchMatch = searchTerm === '' ||
+                        task.task.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        task.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        task.notes.toLowerCase().includes(searchTerm.toLowerCase());
+
+                    return clientMatch && statusMatch && priorityMatch && ownerMatch && supplierOwnerMatch && retailerMatch && searchMatch;
+                });
+            };
+
+            const filteredTasks = filterTasks();
+            const [sortCol, setSortCol] = useState(null);
+            const [sortDir, setSortDir] = useState(null);
+
+            const handleSort = (col) => {
+                if (sortCol === col) {
+                    if (sortDir === 'asc') { setSortDir('desc'); }
+                    else if (sortDir === 'desc') { setSortCol(null); setSortDir(null); }
+                    else { setSortDir('asc'); }
+                } else {
+                    setSortCol(col);
+                    setSortDir('asc');
+                }
+            };
+
+            const priorityOrder = { 'High': 1, 'Medium': 2, 'Low': 3 };
+            const sortedTasks = sortCol && sortDir ? [...filteredTasks].sort((a, b) => {
+                let aVal = a[sortCol] || '';
+                let bVal = b[sortCol] || '';
+                if (sortCol === 'dueDate') {
+                    aVal = new Date(aVal);
+                    bVal = new Date(bVal);
+                    return sortDir === 'asc' ? aVal - bVal : bVal - aVal;
+                }
+                if (sortCol === 'priority') {
+                    aVal = priorityOrder[aVal] || 99;
+                    bVal = priorityOrder[bVal] || 99;
+                    return sortDir === 'asc' ? aVal - bVal : bVal - aVal;
+                }
+                const cmp = String(aVal).toLowerCase().localeCompare(String(bVal).toLowerCase());
+                return sortDir === 'asc' ? cmp : -cmp;
+            }) : filteredTasks;
+
+
+            const handleAddTask = () => {
+                setFormData({
+                    client: '',
+                    clientOwner: '',
+                    category: '',
+                    task: '',
+                    owner: '',
+                    dueDate: '',
+                    status: '',
+                    priority: '',
+                    notes: ''
+                });
+                setShowModal(true);
+            };
+
+            const handleUpdateDueDate = (taskId, newDate) => {
+                setTasks(tasks.map(t => t.id === taskId ? { ...t, dueDate: newDate } : t));
+                setDatePickerTaskId(null);
+            };
+
+            const handleFieldUpdate = (taskId, field, value) => {
+                setTasks(tasks.map(t => t.id === taskId ? { ...t, [field]: value } : t));
+                setEditingField(null);
+            };
+
+            const handleDropdownSelect = (taskId, field, value) => {
+                setTasks(tasks.map(t => t.id === taskId ? { ...t, [field]: value } : t));
+                setDropdownPopup(null);
+            };
+
+            const handleDeleteTask = (id) => {
+                if (confirm('Are you sure you want to delete this task?')) {
+                    setTasks(tasks.filter(t => t.id !== id));
+                }
+            };
+
+            const handleFormChange = (e) => {
+                const { name, value } = e.target;
+                const newFormData = {
+                    ...formData,
+                    [name]: value
+                };
+                // Auto-set clientOwner to first option when client changes
+                if (name === 'client' && value) {
+                    const clientOwners = getSupplierOwnersForClient(value);
+                    newFormData.clientOwner = clientOwners.length > 0 ? clientOwners[0] : '';
+                }
+                setFormData(newFormData);
+            };
+
+            const handleEditFormChange = (e) => {
+                const { name, value } = e.target;
+                setEditFormData(prev => ({
+                    ...prev,
+                    [name]: value
+                }));
+            };
+
+            const handleFormSubmit = () => {
+                if (!formData.client || !formData.clientOwner || !formData.task || !formData.owner || !formData.status || !formData.priority) {
+                    alert('Please fill in all required fields');
+                    return;
+                }
+
+                const newTask = {
+                    ...formData,
+                    id: Date.now().toString()
+                };
+                setTasks([...tasks, newTask]);
+                setShowModal(false);
+            };
+
+            const handleEmailTask = (task) => {
+                setEmailTask(task);
+                setShowEmailModal(true);
+            };
+
+            const generateEmailContent = (task) => {
+                const today = new Date().toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                return `Subject: Follow-up: ${task.task}
+
+Hi,
+
+I wanted to follow up on the following task:
+
+Task Details:
+Client: ${task.client}
+Category: ${task.category}
+Task: ${task.task}
+Owner: ${task.owner}
+Status: ${task.status}
+Priority: ${task.priority}
+
+Due Date: ${task.dueDate}
+
+Notes:
+${task.notes}
+
+Please let me know if you have any questions or if you'd like to discuss this further.
+
+Best regards,
+John Salce
+john.salce@velocitysalesmanagement.net
+
+Date: ${today}`;
+            };
+
+            const prepareExport = (type) => {
+                let dataToExport = [];
+
+                if (type === 'view') {
+                    dataToExport = filteredTasks;
+                } else if (type === 'all') {
+                    dataToExport = tasks;
+                } else if (type === 'owner') {
+                    dataToExport = filteredTasks;
+                }
+
+                setExportData(dataToExport);
+                setExportType(type);
+                setShowExportModal(true);
+            };
+
+            const getColorForValue = (field, value) => {
+                const colorMap = {
+                    'client': {
+                        'World Wide Snacks': '2563eb',
+                        'Sunrise Organics': 'eab308',
+                        'Cerebelly': 'ec4899',
+                        'Premier Foods': 'ea580c'
+                    },
+                    'owner': {
+                        'Scott Gilroy': '166534',
+                        'Rob Levit': '166534',
+                        'Jen Wagoner': '166534',
+                        'Denise Chmielewski': '166534',
+                        'Dustin Anderson': '166534',
+                        'Ken Sorensen': '166534',
+                        'Ashley Jones': '166534',
+                        'Carrie Ellis': '166534',
+                        'Brooke Jones': '166534',
+                        'Adam Levit': '166534',
+                        'John Salce': '166534',
+                        'Julie Ann Hackett': '166534',
+                        'Matt Bennett': '166534',
+                        'Haley Saffel': '166534',
+                        'April McHone': '166534',
+                        'Patrice Leannais': '166534',
+                        'N/A': '166534'
+                    },
+                    'status': {
+                        'In Progress': '2563eb',
+                        'Pending': 'ea580c',
+                        'Complete': '16a34a',
+                        'On Hold': '6b7280',
+                        'Info/Update': '7c3aed'
+                    },
+                    'priority': {
+                        'High': 'dc2626',
+                        'Medium': 'f59e0b',
+                        'Low': '22c55e'
+                    },
+                    'supplier-owner': {
+                        'Danny Pollak': '2563eb',
+                        'Erin Bellavance': 'eab308',
+                        'Hannah Deupree': 'eab308',
+                        'Alyson Colgan': 'ec4899',
+                        'Brittany Albert': 'ec4899',
+                        'Josh McCutchen': 'ea580c',
+                        'Janice Greenwald': '2563eb',
+                        'Jodie Wing': 'ec4899',
+                        'Brandon Dvorak': 'ec4899'
+                    }
+                };
+                return colorMap[field]?.[value] || '000000';
+            };
+
+            const createStyledCell = (value, field) => {
+                return {
+                    v: value,
+                    s: {
+                        font: {
+                            color: { rgb: getColorForValue(field, value) },
+                            bold: ['client', 'owner'].includes(field)
+                        }
+                    }
+                };
+            };
+
+            const downloadXLSX = () => {
+                const wb = XLSX.utils.book_new();
+                let dataToExport = exportData;
+
+                const processSheet = (tasksArray, sheetName) => {
+                    const headers = ['Client', 'Client Owner', 'Category', 'Task', 'VSM Owner', 'Due Date', 'Status', 'Priority', 'Notes'];
+                    const rows = [headers];
+                    tasksArray.forEach(task => {
+                        rows.push([
+                            task.client || '',
+                            task.clientOwner || '',
+                            task.category || '',
+                            task.task || '',
+                            task.owner || '',
+                            task.dueDate || '',
+                            task.status || '',
+                            task.priority || '',
+                            task.notes || ''
+                        ]);
+                    });
+                    const ws = XLSX.utils.aoa_to_sheet(rows);
+                    ws['!cols'] = [
+                        { wch: 18 },
+                        { wch: 18 },
+                        { wch: 15 },
+                        { wch: 40 },
+                        { wch: 18 },
+                        { wch: 15 },
+                        { wch: 15 },
+                        { wch: 12 },
+                        { wch: 40 }
+                    ];
+                    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+                };
+
+                if (exportType === 'owner') {
+                    const ownerGroups = {};
+                    dataToExport.forEach(task => {
+                        if (!ownerGroups[task.owner]) {
+                            ownerGroups[task.owner] = [];
+                        }
+                        ownerGroups[task.owner].push(task);
+                    });
+
+                    Object.keys(ownerGroups).forEach(owner => {
+                        processSheet(ownerGroups[owner], owner);
+                    });
+                } else {
+                    processSheet(dataToExport, 'Tasks')
+                }
+
+                XLSX.writeFile(wb, `tasks-export-${new Date().toISOString().split('T')[0]}.xlsx`);
+                setShowExportModal(false);
+            };
+
+            const getStatusClass = (status) => {
+                return `status-${status.toLowerCase().replace(/[\/\s]/g, '-')}`;
+            };
+
+            const getPriorityClass = (priority) => {
+                return `priority-${priority.toLowerCase()}`;
+            };
+
+            const getDueDateClass = (dueDate) => {
+                if (!dueDate) return 'due-later';
+
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                const due = new Date(dueDate);
+                due.setHours(0, 0, 0, 0);
+
+                const daysUntilDue = Math.floor((due - today) / (1000 * 60 * 60 * 24));
+
+                if (daysUntilDue < 0) return 'overdue';
+                if (daysUntilDue <= 2) return 'due-soon-2';
+                if (daysUntilDue <= 7) return 'due-soon-7';
+                return 'due-later';
+            };
+
+            const formatDateWithDay = (dateString) => {
+                if (!dateString) return '';
+
+                const date = new Date(dateString + 'T00:00:00');
+                const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                const dayName = daysOfWeek[date.getUTCDay()];
+                const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+                const day = String(date.getUTCDate()).padStart(2, '0');
+                const year = date.getUTCFullYear();
+
+                return `${dayName} ${month}/${day}/${year}`;
+            };
+
+            return (
+                <>
+                    <div className="header">
+                        <div className="header-left">
+                            <h1>Velocity Task Manager</h1>
+                            <p>Velocity Sales & Marketing &mdash; Live Tasks</p>
+                        </div>
+                        <div className="header-right">
+                            <div className="header-email">john.salce@velocitysalesmanagement.net</div>
+                            <button className="sign-out-btn">Sign Out</button>
+                        </div>
+                    </div>
+
+                    <div className="container">
+                        <div className="client-nav">
+                            {CLIENTS.map(client => (
+                                <button
+                                    key={client}
+                                    data-client={client}
+                                    className={`client-btn ${selectedClient === client ? 'active' : ''}`}
+                                    onClick={() => { setSelectedClient(client); setSelectedSupplierOwners([]); }}
+                                >
+                                    {client}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="filters-section">
+                            <div className="filter-group">
+                                <div className="filter-label">Status</div>
+                                <div className="filter-options">
+                                    {STATUSES.map(status => (
+                                        <button
+                                            key={status}
+                                            data-filter-type="status"
+                                            data-status={status}
+                                            className={`filter-btn ${selectedStatuses.includes(status) ? 'active' : ''}`}
+                                            onClick={() => {
+                                                setSelectedStatuses(prev =>
+                                                    prev.includes(status)
+                                                        ? prev.filter(s => s !== status)
+                                                        : [...prev, status]
+                                                );
+                                            }}
+                                        >
+                                            {status}
+                                        </button>
+                                    ))}
+                                    {selectedStatuses.length > 0 && (
+                                        <button
+                                            className="clear-pill"
+                                            onClick={() => setSelectedStatuses([])}
+                                        >
+                                            Clear
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="filter-group">
+                                <div className="filter-label">Priority</div>
+                                <div className="filter-options">
+                                    {PRIORITIES.map(priority => (
+                                        <button
+                                            key={priority}
+                                            data-filter-type="priority"
+                                            data-priority={priority}
+                                            className={`filter-btn ${selectedPriorities.includes(priority) ? 'active' : ''}`}
+                                            onClick={() => {
+                                                setSelectedPriorities(prev =>
+                                                    prev.includes(priority)
+                                                        ? prev.filter(p => p !== priority)
+                                                        : [...prev, priority]
+                                                );
+                                            }}
+                                        >
+                                            {priority}
+                                        </button>
+                                    ))}
+                                    {selectedPriorities.length > 0 && (
+                                        <button
+                                            className="clear-pill"
+                                            onClick={() => setSelectedPriorities([])}
+                                        >
+                                            Clear
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="filter-group">
+                                <div className="filter-label">VSM Owner</div>
+                                <div className="filter-options">
+                                    {OWNERS.map(owner => (
+                                        <button
+                                            key={owner}
+                                            data-filter-type="owner"
+                                            data-owner={owner}
+                                            className={`filter-btn ${selectedOwners.includes(owner) ? 'active' : ''}`}
+                                            onClick={() => {
+                                                setSelectedOwners(prev =>
+                                                    prev.includes(owner)
+                                                        ? prev.filter(o => o !== owner)
+                                                        : [...prev, owner]
+                                                );
+                                            }}
+                                        >
+                                            {owner}
+                                        </button>
+                                    ))}
+                                    {selectedOwners.length > 0 && (
+                                        <button
+                                            className="clear-pill"
+                                            onClick={() => setSelectedOwners([])}
+                                        >
+                                            Clear
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="filter-group">
+                                <div className="filter-label">Client Owner</div>
+                                <div className="filter-options">
+                                    {(selectedClient !== 'All Clients' ? getSupplierOwnersForClient(selectedClient) : SUPPLIER_OWNERS).map(supplierOwner => (
+                                        <button
+                                            key={supplierOwner}
+                                            data-filter-type="supplier-owner"
+                                            data-supplier-owner={supplierOwner}
+                                            className={`filter-btn ${selectedSupplierOwners.includes(supplierOwner) ? 'active' : ''}`}
+                                            onClick={() => {
+                                                setSelectedSupplierOwners(prev =>
+                                                    prev.includes(supplierOwner)
+                                                        ? prev.filter(so => so !== supplierOwner)
+                                                        : [...prev, supplierOwner]
+                                                );
+                                            }}
+                                        >
+                                            {supplierOwner}
+                                        </button>
+                                    ))}
+                                    {selectedSupplierOwners.length > 0 && (
+                                        <button
+                                            className="clear-pill"
+                                            onClick={() => setSelectedSupplierOwners([])}
+                                        >
+                                            Clear
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+<div className="filter-group">
+                                <div className="filter-label">Retailer</div>
+                                <div className="filter-options">
+                                    {RETAILERS.map(retailer => (
+                                        <button
+                                            key={retailer}
+                                            data-filter-type="retailer"
+                                            data-retailer={retailer}
+                                            className={`filter-btn ${selectedRetailers.includes(retailer) ? 'active' : ''}`}
+                                            onClick={() => {
+                                                setSelectedRetailers(prev =>
+                                                    prev.includes(retailer)
+                                                        ? prev.filter(o => o !== retailer)
+                                                        : [...prev, retailer]
+                                                );
+                                            }}
+                                        >
+                                            {retailer}
+                                        </button>
+                                    ))}
+                                    {selectedRetailers.length > 0 && (
+                                        <button
+                                            className="clear-pill"
+                                            onClick={() => setSelectedRetailers([])}
+                                        >
+                                            Clear
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="search-export">
+                            <input
+                                type="text"
+                                className="search-box"
+                                placeholder="Search tasks..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                            <div className="action-buttons">
+                                <button className="btn-new-task" onClick={handleAddTask}>
+                                    + New Task
+                                </button>
+                                <button className="export-btn export-owner" onClick={() => setShowEmailByOwner(true)}>
+                                    Email by Owner
+                                </button>
+                                <button className="export-btn export-view" onClick={() => prepareExport('view')}>
+                                    Export View
+                                </button>
+                                <button className="export-btn export-all" onClick={() => prepareExport('all')}>
+                                    Export All
+                                </button>
+                                <button className="export-btn export-owner" onClick={() => prepareExport('owner')}>
+                                    Export by Owner
+                                </button>
+                            </div>
+                        </div>
+
+                        {filteredTasks.length === 0 ? (
+                            <div className="no-data">
+                                No tasks found
+                            </div>
+                        ) : (
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("client")}><span style={{display:'flex',alignItems:'center',color:sortCol==="client"?'#7c3aed':'inherit'}}>Client<span style={{fontSize:9,color:sortCol==="client"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="client"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="client"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
+                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("clientOwner")}><span style={{display:'flex',alignItems:'center',color:sortCol==="clientOwner"?'#7c3aed':'inherit'}}>Client Owner<span style={{fontSize:9,color:sortCol==="clientOwner"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="clientOwner"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="clientOwner"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
+                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("category")}><span style={{display:'flex',alignItems:'center',color:sortCol==="category"?'#7c3aed':'inherit'}}>Category<span style={{fontSize:9,color:sortCol==="category"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="category"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="category"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
+                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("task")}><span style={{display:'flex',alignItems:'center',color:sortCol==="task"?'#7c3aed':'inherit'}}>Task<span style={{fontSize:9,color:sortCol==="task"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="task"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="task"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
+                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("owner")}><span style={{display:'flex',alignItems:'center',color:sortCol==="owner"?'#7c3aed':'inherit'}}>VSM Owner<span style={{fontSize:9,color:sortCol==="owner"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="owner"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="owner"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
+                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("dueDate")}><span style={{display:'flex',alignItems:'center',color:sortCol==="dueDate"?'#7c3aed':'inherit'}}>Due Date<span style={{fontSize:9,color:sortCol==="dueDate"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="dueDate"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="dueDate"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
+                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("status")}><span style={{display:'flex',alignItems:'center',color:sortCol==="status"?'#7c3aed':'inherit'}}>Status<span style={{fontSize:9,color:sortCol==="status"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="status"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="status"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
+                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("priority")}><span style={{display:'flex',alignItems:'center',color:sortCol==="priority"?'#7c3aed':'inherit'}}>Priority<span style={{fontSize:9,color:sortCol==="priority"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="priority"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="priority"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
+                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("notes")}><span style={{display:'flex',alignItems:'center',color:sortCol==="notes"?'#7c3aed':'inherit'}}>Notes<span style={{fontSize:9,color:sortCol==="notes"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="notes"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="notes"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
+                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("retailer")}><span style={{display:'flex',alignItems:'center',color:sortCol==="retailer"?'#7c3aed':'inherit'}}>Retailer<span style={{fontSize:9,color:sortCol==="retailer"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="retailer"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="retailer"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {sortedTasks.map(task => (
+                                        <tr key={task.id} className={task.status === 'Complete' ? 'task-completed' : ''}>
+                                            <td>{task.client}</td>
+                                            <td>
+                                                <div className="field-with-dropdown" onClick={(e) => { e.stopPropagation(); setDropdownPopup({ taskId: task.id, field: 'clientOwner' }); }}>
+                                                    <span style={{ color: `#${getColorForValue('supplier-owner', task.clientOwner)}`, fontWeight: '600' }}>{task.clientOwner}</span>
+                                                    <span className="dropdown-arrow">&#x25BC;</span>
+                                                </div>
+                                                {dropdownPopup?.taskId === task.id && dropdownPopup?.field === 'clientOwner' && (
+                                                    <div className="dropdown-popup">
+                                                        {getSupplierOwnersForClient(task.client).map(owner => (
+                                                            <div
+                                                                key={owner}
+                                                                className="dropdown-popup-item"
+                                                                onClick={() => handleDropdownSelect(task.id, 'clientOwner', owner)}
+                                                            >
+                                                                {owner}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td className="inline-edit-field" onClick={() => setEditingField({ taskId: task.id, field: 'category' })}>
+                                                {editingField?.taskId === task.id && editingField?.field === 'category' ? (
+                                                    <input
+                                                        type="text"
+                                                        className="inline-edit-input"
+                                                        value={task.category}
+                                                        onChange={(e) => setTasks(tasks.map(t => t.id === task.id ? { ...t, category: e.target.value } : t))}
+                                                        onBlur={() => setEditingField(null)}
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === 'Enter') setEditingField(null);
+                                                            if (e.key === 'Escape') setEditingField(null);
+                                                        }}
+                                                        autoFocus
+                                                    />
+                                                ) : (
+                                                    task.category
+                                                )}
+                                            </td>
+                                            <td className="inline-edit-field" onClick={() => setEditingField({ taskId: task.id, field: 'task' })}>
+                                                {editingField?.taskId === task.id && editingField?.field === 'task' ? (
+                                                    <input
+                                                        type="text"
+                                                        className="inline-edit-input"
+                                                        value={task.task}
+                                                        onChange={(e) => setTasks(tasks.map(t => t.id === task.id ? { ...t, task: e.target.value } : t))}
+                                                        onBlur={() => setEditingField(null)}
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === 'Enter') setEditingField(null);
+                                                            if (e.key === 'Escape') setEditingField(null);
+                                                        }}
+                                                        autoFocus
+                                                    />
+                                                ) : (
+                                                    task.task
+                                                )}
+                                            </td>
+                                            <td>
+                                                <div className="field-with-dropdown" onClick={(e) => { e.stopPropagation(); setDropdownPopup({ taskId: task.id, field: 'owner' }); }}>
+                                                    <span className="owner-name" data-owner={task.owner} style={{ color: `#${getColorForValue('owner', task.owner)}` }}>{task.owner}</span>
+                                                    <span className="dropdown-arrow">&#x25BC;</span>
+                                                </div>
+                                                {dropdownPopup?.taskId === task.id && dropdownPopup?.field === 'owner' && (
+                                                    <div className="dropdown-popup">
+                                                        {OWNERS.map(owner => (
+                                                            <div
+                                                                key={owner}
+                                                                className="dropdown-popup-item"
+                                                                onClick={() => handleDropdownSelect(task.id, 'owner', owner)}
+                                                            >
+                                                                {owner}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td className="due-date-cell" onClick={() => setDatePickerTaskId(task.id)}>
+                                                {datePickerTaskId === task.id ? (
+                                                    <input
+                                                        type="date"
+                                                        className="date-picker-input"
+                                                        value={task.dueDate}
+                                                        onChange={(e) => handleUpdateDueDate(task.id, e.target.value)}
+                                                        onBlur={() => setDatePickerTaskId(null)}
+                                                        autoFocus
+                                                    />
+                                                ) : (
+                                                    <span className={`due-date ${getDueDateClass(task.dueDate)}`}>{formatDateWithDay(task.dueDate)}</span>
+                                                )}
+                                            </td>
+                                            <td>
+                                                <div className="field-with-dropdown" onClick={(e) => { e.stopPropagation(); setDropdownPopup({ taskId: task.id, field: 'status' }); }}>
+                                                    <span className={`status-badge ${getStatusClass(task.status)}`}>{task.status}</span>
+                                                    <span className="dropdown-arrow">&#x25BC;</span>
+                                                </div>
+                                                {dropdownPopup?.taskId === task.id && dropdownPopup?.field === 'status' && (
+                                                    <div className="dropdown-popup">
+                                                        {STATUSES.map(status => (
+                                                            <div
+                                                                key={status}
+                                                                className="dropdown-popup-item"
+                                                                onClick={() => handleDropdownSelect(task.id, 'status', status)}
+                                                            >
+                                                                {status}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td>
+                                                <div className="field-with-dropdown" onClick={(e) => { e.stopPropagation(); setDropdownPopup({ taskId: task.id, field: 'priority' }); }}>
+                                                    <span className={getPriorityClass(task.priority)}>{task.priority}</span>
+                                                    <span className="dropdown-arrow">&#x25BC;</span>
+                                                </div>
+                                                {dropdownPopup?.taskId === task.id && dropdownPopup?.field === 'priority' && (
+                                                    <div className="dropdown-popup">
+                                                        {PRIORITIES.map(priority => (
+                                                            <div
+                                                                key={priority}
+                                                                className="dropdown-popup-item"
+                                                                onClick={() => handleDropdownSelect(task.id, 'priority', priority)}
+                                                            >
+                                                                {priority}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td className="inline-edit-field" onClick={() => setEditingField({ taskId: task.id, field: 'notes' })}>
+                                                {editingField?.taskId === task.id && editingField?.field === 'notes' ? (
+                                                    <textarea
+                                                        className="inline-edit-input"
+                                                        value={task.notes}
+                                                        onChange={(e) => setTasks(tasks.map(t => t.id === task.id ? { ...t, notes: e.target.value } : t))}
+                                                        onBlur={() => setEditingField(null)}
+                                                        autoFocus
+                                                        style={{ minHeight: '60px', resize: 'vertical' }}
+                                                    />
+                                                ) : (
+                                                    <div className="notes-display">{task.notes}</div>
+                                                )}
+                                            </td>
+<td>
+                                                <div className="field-with-dropdown" onClick={(e) => { e.stopPropagation(); setDropdownPopup({ taskId: task.id, field: 'retailer' }); }}>
+                                                    <span className={`retailer-badge ${getRetailerClass(task.retailer || '')}`}>{task.retailer || ''}</span>
+                                                    <span className="dropdown-arrow">&#x25BC;</span>
+                                                </div>
+                                                {dropdownPopup?.taskId === task.id && dropdownPopup?.field === 'retailer' && (
+                                                    <div className="dropdown-popup">
+                                                        {RETAILERS.map(retailer => (
+                                                            <div
+                                                                key={retailer}
+                                                                className="dropdown-popup-item"
+                                                                onClick={() => handleDropdownSelect(task.id, 'retailer', retailer)}
+                                                            >
+                                                                {retailer}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </td>
+
+                                            <td>
+                                                <div className="action-icons">
+                                                    <button className="icon-btn" onClick={() => handleEmailTask(task)} title="Email">
+                                                        &#x2709;&#xFE0F;
+                                                    </button>
+                                                    <button className="icon-btn" onClick={() => handleDeleteTask(task.id)} title="Delete">
+                                                        &#x1F5D1;&#xFE0F;
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
+                    </div>
+
+                    {/* Task Modal for Creating New Tasks */}
+                    <div className={`modal ${showModal ? 'show' : ''}`}>
+                        <div className="modal-content">
+                            <div className="modal-header">Create New Task</div>
+                            <div className="form-group">
+                                <label>Client *</label>
+                                <select
+                                    name="client"
+                                    value={formData.client}
+                                    onChange={handleFormChange}
+                                >
+                                    <option value="">Select a client</option>
+                                    {CLIENTS.filter(c => c !== 'All Clients').map(client => (
+                                        <option key={client} value={client}>{client}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label>Client Owner</label>
+                                <select
+                                    name="clientOwner"
+                                    value={formData.clientOwner}
+                                    onChange={handleFormChange}
+                                    
+                                >
+                                    <option value="">Select a client owner</option>
+                                    {formData.client && getSupplierOwnersForClient(formData.client).map(owner => (
+                                        <option key={owner} value={owner}>{owner}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label>Category</label>
+                                <input
+                                    type="text"
+                                    name="category"
+                                    value={formData.category}
+                                    onChange={handleFormChange}
+                                    placeholder="e.g., Sales, Support, Development"
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Task</label>
+                                <input
+                                    type="text"
+                                    name="task"
+                                    value={formData.task}
+                                    onChange={handleFormChange}
+                                    placeholder="Task description"
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Owner</label>
+                                <select
+                                    name="owner"
+                                    value={formData.owner}
+                                    onChange={handleFormChange}
+                                >
+                                    <option value="">Select owner</option>
+                                    {OWNERS.map(owner => (
+                                        <option key={owner} value={owner}>{owner}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label>Due Date</label>
+                                <input
+                                    type="date"
+                                    name="dueDate"
+                                    value={formData.dueDate}
+                                    onChange={handleFormChange}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Status</label>
+                                <select
+                                    name="status"
+                                    value={formData.status}
+                                    onChange={handleFormChange}
+                                >
+                                    <option value="">Select status</option>
+                                    {STATUSES.map(status => (
+                                        <option key={status} value={status}>{status}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label>Priority</label>
+                                <select
+                                    name="priority"
+                                    value={formData.priority}
+                                    onChange={handleFormChange}
+                                >
+                                    <option value="">Select priority</option>
+                                    {PRIORITIES.map(priority => (
+                                        <option key={priority} value={priority}>{priority}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label>Notes</label>
+                                <textarea
+                                    name="notes"
+                                    value={formData.notes}
+                                    onChange={handleFormChange}
+                                    placeholder="Add any additional notes"
+                                />
+                            </div>
+<div className="form-group">
+                                <label>Retailer</label>
+                                <select
+                                    name="retailer"
+                                    value={formData.retailer}
+                                    onChange={handleFormChange}
+                                >
+                                    <option value="">Select retailer</option>
+                                    {RETAILERS.map(retailer => (
+                                        <option key={retailer} value={retailer}>{retailer}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="form-actions">
+                                <button className="btn-secondary" onClick={() => setShowModal(false)}>
+                                    Cancel
+                                </button>
+                                <button className="btn-primary" onClick={handleFormSubmit}>
+                                    Create Task
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Email Modal */}
+                    <div className={`modal ${showEmailModal ? 'show' : ''}`}>
+                        <div className="modal-content">
+                            <div className="modal-header">Follow-up Email Draft</div>
+                            {emailTask && (
+                                <>
+                                    <div className="email-preview">
+                                        {generateEmailContent(emailTask)}
+                                    </div>
+                                    <div className="form-actions">
+                                        <button className="btn-secondary" onClick={() => setShowEmailModal(false)}>
+                                            Close
+                                        </button>
+                                        <button className="btn-primary" onClick={() => {
+                                            const content = generateEmailContent(emailTask);
+                                            const subject = 'Follow-up: ' + emailTask.task;
+
+                                            // Try Outlook protocol first
+                                            const outlookLink = `outlook://insync/?mailto:${encodeURIComponent('?subject=' + subject + '&body=' + content)}`;
+
+                                            // Create mailto link as fallback
+                                            const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(content)}`;
+
+                                            // Try Outlook first
+                                            const outlookAttempt = window.open(outlookLink, '_blank');
+
+                                            // If Outlook doesn't work, fall back to mailto
+                                            setTimeout(() => {
+                                                if (!outlookAttempt || outlookAttempt.closed || typeof outlookAttempt.closed === 'undefined') {
+                                                    const element = document.createElement('a');
+                                                    element.setAttribute('href', mailtoLink);
+                                                    element.click();
+                                                }
+                                            }, 500);
+                                        }}>
+                                            Open in Email Client
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Email by Owner Modal */}
+                    <div className={`modal ${showEmailByOwner ? 'show' : ''}`}>
+                        <div className="modal-content" style={{ maxWidth: '700px' }}>
+                            <div className="modal-header">Email Tasks by Owner</div>
+                            <p style={{ marginBottom: '16px', color: '#666', fontSize: '14px' }}>
+                                Click on an owner to view their tasks and send them an email
+                            </p>
+                            <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
+                                {OWNERS.map(owner => {
+                                    const ownerTasks = tasks.filter(t => t.owner === owner);
+                                    const isExpanded = expandedOwner === owner;
+                                    return (
+                                        <div key={owner} className="owner-email-section">
+                                            <div className="owner-email-header" onClick={() => setExpandedOwner(isExpanded ? null : owner)}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                                                    <span className="owner-name-header" style={{ color: `#${getColorForValue('owner', owner)}` }}>
+                                                        {owner}
+                                                    </span>
+                                                    <span className="owner-task-count">{ownerTasks.length} task{ownerTasks.length !== 1 ? 's' : ''}</span>
+                                                </div>
+                                                <span style={{ fontSize: '18px', color: '#999' }}>
+                                                    {isExpanded ? '&#x25BC;' : '&#x25B6;'}
+                                                </span>
+                                            </div>
+                                            {isExpanded && ownerTasks.length > 0 && (
+                                                <>
+                                                    <div className="owner-tasks-list">
+                                                        {ownerTasks.map(task => (
+                                                            <div key={task.id} className="owner-task-row">
+                                                                <div style={{ fontWeight: '600', color: '#333' }}>{task.task}</div>
+                                                                <div className="task-detail">
+                                                                    <div className="task-detail-item">
+                                                                        <div className="task-detail-label">Client</div>
+                                                                        <div style={{ color: `#${getColorForValue('client', task.client)}`, fontWeight: '600' }}>{task.client}</div>
+                                                                    </div>
+                                                                    <div className="task-detail-item">
+                                                                        <div className="task-detail-label">Status</div>
+                                                                        <div style={{ color: `#${getColorForValue('status', task.status)}`, fontWeight: '600' }}>{task.status}</div>
+                                                                    </div>
+                                                                    <div className="task-detail-item">
+                                                                        <div className="task-detail-label">Priority</div>
+                                                                        <div style={{ color: `#${getColorForValue('priority', task.priority)}`, fontWeight: '600' }}>{task.priority}</div>
+                                                                    </div>
+                                                                    <div className="task-detail-item">
+                                                                        <div className="task-detail-label">Due Date</div>
+                                                                        <div>{task.dueDate}</div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                    <div style={{ marginTop: '16px', padding: '12px', backgroundColor: '#f9f9f9', borderRadius: '4px', border: '1px solid #e0e0e0' }}>
+                                                        <div style={{ fontSize: '11px', fontWeight: '600', color: '#666', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                                            Email Draft
+                                                        </div>
+                                                        <div style={{ backgroundColor: 'white', padding: '12px', borderRadius: '4px', fontSize: '13px', lineHeight: '1.6', fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordWrap: 'break-word', maxHeight: '300px', overflowY: 'auto', border: '1px solid #ddd' }}>
+                                                            {`Subject: Your Assigned Tasks\n\nHi ${owner.split(' ')[0]},\n\nHere is a summary of your assigned tasks:\n\n${ownerTasks.map(t => `&bull; ${t.task}\n  Client: ${t.client} | Status: ${t.status} | Priority: ${t.priority} | Due: ${t.dueDate}`).join('\n\n')}\n\n\nPlease let me know if you have any questions.\n\nBest regards,\nJohn Salce\njohn.salce@velocitysalesmanagement.net`}
+                                                        </div>
+                                                        <button
+                                                            className="owner-email-btn"
+                                                            onClick={() => {
+                                                                const emailContent = `Subject: Your Assigned Tasks\n\nHi ${owner.split(' ')[0]},\n\nHere is a summary of your assigned tasks:\n\n${ownerTasks.map(t => `&bull; ${t.task}\n  Client: ${t.client} | Status: ${t.status} | Priority: ${t.priority} | Due: ${t.dueDate}`).join('\n\n')}\n\n\nPlease let me know if you have any questions.\n\nBest regards,\nJohn Salce\njohn.salce@velocitysalesmanagement.net`;
+                                                                navigator.clipboard.writeText(emailContent);
+                                                                alert('Email draft copied to clipboard!');
+                                                            }}
+                                                            style={{ marginTop: '12px', width: '100%' }}
+                                                        >
+                                                            Copy to Clipboard
+                                                        </button>
+                                                    </div>
+                                                </>
+                                            )}
+                                            {isExpanded && ownerTasks.length === 0 && (
+                                                <div style={{ padding: '12px 0', color: '#999', fontSize: '13px' }}>
+                                                    No tasks assigned
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            <div className="form-actions" style={{ marginTop: '16px' }}>
+                                <button className="btn-secondary" onClick={() => setShowEmailByOwner(false)}>
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Export Modal */}
+                    <div className={`modal ${showExportModal ? 'show' : ''}`}>
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                {exportType === 'view' && 'Export View'}
+                                {exportType === 'all' && 'Export All Tasks'}
+                                {exportType === 'owner' && 'Export by Owner'}
+                            </div>
+                            <p style={{ marginBottom: '12px', color: '#666' }}>
+                                {exportData.length} task{exportData.length !== 1 ? 's' : ''} will be exported
+                            </p>
+                            <div className="export-preview">
+                                {exportType === 'owner' ? (
+                                    <div>
+                                        {Object.entries(
+                                            exportData.reduce((acc, task) => {
+                                                if (!acc[task.owner]) acc[task.owner] = [];
+                                                acc[task.owner].push(task);
+                                                return acc;
+                                            }, {})
+                                        ).map(([owner, ownerTasks]) => (
+                                            <div key={owner} style={{ marginBottom: '16px' }}>
+                                                <strong>{owner}</strong>
+                                                <table>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Client</th>
+                                                            <th>Category</th>
+                                                            <th>Task</th>
+                                                            <th>Due Date</th>
+                                                            <th>Status</th>
+                                                            <th>Priority</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {ownerTasks.map(task => (
+                                                            <tr key={task.id}>
+                                                                <td>{task.client}</td>
+                                                                <td>{task.category}</td>
+                                                                <td>{task.task}</td>
+                                                                <td>{task.dueDate}</td>
+                                                                <td>{task.status}</td>
+                                                                <td>{task.priority}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Client</th>
+                                                <th>Category</th>
+                                                <th>Task</th>
+                                                <th>Owner</th>
+                                                <th>Due Date</th>
+                                                <th>Status</th>
+                                                <th>Priority</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {exportData.map(task => (
+                                                <tr key={task.id}>
+                                                    <td>{task.client}</td>
+                                                    <td>{task.category}</td>
+                                                    <td>{task.task}</td>
+                                                    <td>{task.owner}</td>
+                                                    <td>{task.dueDate}</td>
+                                                    <td>{task.status}</td>
+                                                    <td>{task.priority}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                )}
+                            </div>
+                            <div className="form-actions">
+                                <button className="btn-secondary" onClick={() => setShowExportModal(false)}>
+                                    Cancel
+                                </button>
+                                <button className="btn-primary" onClick={downloadXLSX}>
+                                    Download XLSX
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<TaskManager />);
+    </script>
+</body>
+</html>
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Velocity Task Manager</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-color: #f0f2f5;
+        
+        .header {
+            background: linear-gradient(135deg, #1a3a1a 0%, #2d5a2d 60%, #3d7a3d 100%);
+            color: white;
+            padding: 16px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 4px solid #5cb85c;
+            box-shadow: 0 3px 16px rgba(0,0,0,0.3);
+        }
+        .header-left { display: flex; align-items: center; gap: 14px; }
+        .header-logo { font-size: 34px; line-height: 1; }
+        .header-title-group h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.3px; margin-bottom: 2px; }
+        .header-title-group p { font-size: 13px; opacity: 0.8; }
+        .header-badge {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 20px;
+            padding: 5px 13px;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .header-badge-dot {
+            width: 8px; height: 8px;
+            background: #7dda7d;
+            border-radius: 50%;
+            box-shadow: 0 0 7px #7dda7d;
+            animation: livepulse 2s infinite;
+        }
+        @keyframes livepulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+        .header-right { display: flex; align-items: center; gap: 14px; }
+        .header-email { font-size: 13px; opacity: 0.8; }
+        .sign-out-btn {
+            padding: 7px 16px;
+            background: rgba(255,255,255,0.12);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .sign-out-btn:hover { background: rgba(255,255,255,0.25); }
+        .container { max-width: 1700px; margin: 0 auto; padding: 20px 24px; }
+        .client-nav { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .client-btn {
+            padding: 10px 20px;
+            border: 2px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            color: #555;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            min-width: 110px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+        .client-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+        .client-btn-count { font-size: 11px; font-weight: 500; opacity: 0.7; }
+        .client-btn[data-client="All Clients"] { color: #dc2626; border-color: #fca5a5; }
+        .client-btn[data-client="World Wide Snacks"] { color: #2563eb; border-color: #bfdbfe; }
+        .client-btn[data-client="Sunrise Organics"] { color: #ca8a04; border-color: #fde68a; }
+        .client-btn[data-client="Cerebelly"] { color: #db2777; border-color: #fbcfe8; }
+        .client-btn[data-client="Premier Foods"] { color: #ea580c; border-color: #fed7aa; }
+        .client-btn.active[data-client="All Clients"] { background:#dc2626; border-color:#dc2626; color:white; box-shadow:0 4px 14px rgba(220,38,38,0.35); }
+        .client-btn.active[data-client="World Wide Snacks"] { background:#2563eb; border-color:#2563eb; color:white; box-shadow:0 4px 14px rgba(37,99,235,0.35); }
+        .client-btn.active[data-client="Sunrise Organics"] { background:#ca8a04; border-color:#ca8a04; color:white; box-shadow:0 4px 14px rgba(202,138,4,0.35); }
+        .client-btn.active[data-client="Cerebelly"] { background:#db2777; border-color:#db2777; color:white; box-shadow:0 4px 14px rgba(219,39,119,0.35); }
+        .client-btn.active[data-client="Premier Foods"] { background:#ea580c; border-color:#ea580c; color:white; box-shadow:0 4px 14px rgba(234,88,12,0.35); }
+        .client-btn.active .client-btn-count { opacity: 0.9; }
+        .filters-section {
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 18px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+            border: 1px solid #e8e8e8;
+            overflow: hidden;
+        }
+        .filters-toggle-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 18px;
+            cursor: pointer;
+            background: white;
+            transition: background 0.15s;
+            user-select: none;
+        }
+        .filters-toggle-bar:hover { background: #f9f9f9; }
+        .filters-toggle-left { display: flex; align-items: center; gap: 10px; }
+        .filters-toggle-label { font-size: 13px; font-weight: 700; color: #444; text-transform: uppercase; letter-spacing: 0.6px; }
+        .filters-active-dots { display: flex; gap: 5px; align-items: center; }
+        .filters-active-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .filters-toggle-arrow { font-size: 12px; color: #999; transition: transform 0.2s; display: inline-block; }
+        .filters-toggle-arrow.open { transform: rotate(180deg); }
+        .filters-body { border-top: 1px solid #f0f0f0; }
+        .filter-group {
+            padding: 12px 18px;
+            border-bottom: 1px solid #f5f5f5;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .filter-group:last-child { border-bottom: none; }
+        .filter-label { font-size: 11px; font-weight: 700; color: #666; text-transform: uppercase; min-width: 80px; letter-spacing: 0.5px; }
+        .filter-options { display: flex; flex-wrap: wrap; gap: 7px; flex: 1; align-items: center; }
+        .filter-btn {
+            padding: 6px 14px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            cursor: pointer;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+            color: #444;
+        }
+        .filter-btn:hover { border-color: #999; transform: translateY(-1px); }
+        .filter-btn.active { font-weight: 700; color: white !important; }
+        .filter-btn[data-filter-type="status"][data-status="In Progress"] { color: #2563eb; border-color: #bfdbfe; }
+        .filter-btn[data-filter-type="status"][data-status="Pending"] { color: #ea580c; border-color: #fed7aa; }
+        .filter-btn[data-filter-type="status"][data-status="Complete"] { color: #16a34a; border-color: #bbf7d0; }
+        .filter-btn[data-filter-type="status"][data-status="On Hold"] { color: #6b7280; border-color: #d1d5db; }
+        .filter-btn[data-filter-type="status"][data-status="Info/Update"] { color: #7c3aed; border-color: #ddd6fe; }
+        .filter-btn.active[data-filter-type="status"][data-status="In Progress"] { background:#2563eb; border-color:#2563eb; }
+        .filter-btn.active[data-filter-type="status"][data-status="Pending"] { background:#ea580c; border-color:#ea580c; }
+        .filter-btn.active[data-filter-type="status"][data-status="Complete"] { background:#16a34a; border-color:#16a34a; }
+        .filter-btn.active[data-filter-type="status"][data-status="On Hold"] { background:#6b7280; border-color:#6b7280; }
+        .filter-btn.active[data-filter-type="status"][data-status="Info/Update"] { background:#7c3aed; border-color:#7c3aed; }
+        .filter-btn[data-filter-type="priority"][data-priority="High"] { color: #dc2626; border-color: #fca5a5; }
+        .filter-btn[data-filter-type="priority"][data-priority="Medium"] { color: #f59e0b; border-color: #fde68a; }
+        .filter-btn[data-filter-type="priority"][data-priority="Low"] { color: #22c55e; border-color: #bbf7d0; }
+        .filter-btn.active[data-filter-type="priority"][data-priority="High"] { background:#dc2626; border-color:#dc2626; }
+        .filter-btn.active[data-filter-type="priority"][data-priority="Medium"] { background:#f59e0b; border-color:#f59e0b; }
+        .filter-btn.active[data-filter-type="priority"][data-priority="Low"] { background:#22c55e; border-color:#22c55e; }
+        .filter-btn[data-filter-type="owner"][data-owner="Scott Gilroy"] { color: #166534; }
+        .filter-btn[data-filter-type="owner"][data-owner="Rob Levit"] { color: #166534; }
+        .filter-btn[data-filter-type="owner"][data-owner="Jen Wagoner"] { color: #166534; }
+        .filter-btn[data-filter-type="owner"][data-owner="Denise Chmielewski"] { color: #166534; }
+        .filter-btn[data-filter-type="owner"][data-owner="Dustin Anderson"] { color: #166534; }
+        .filter-btn[data-filter-type="owner"][data-owner="Ken Sorensen"] { color: #166534; }
+        .filter-btn[data-filter-type="owner"][data-owner="Ashley Jones"] { color: #166534; }
+        .filter-btn[data-filter-type="owner"][data-owner="Carrie Ellis"] { color: #166534; }
+        .filter-btn[data-filter-type="owner"][data-owner="Brooke Jones"] { color: #166534; }
+        .filter-btn[data-filter-type="owner"][data-owner="Adam Levit"] { color: #166534; }
+        .filter-btn[data-filter-type="owner"][data-owner="John Salce"] { color: #166534; }
+        .filter-btn[data-filter-type="owner"][data-owner="N/A"] { color: #166534; }
+        .filter-btn.active[data-filter-type="owner"][data-owner="Scott Gilroy"] { background:#166534; border-color:#166534; }
+        .filter-btn.active[data-filter-type="owner"][data-owner="Rob Levit"] { background:#166534; border-color:#166534; }
+        .filter-btn.active[data-filter-type="owner"][data-owner="Jen Wagoner"] { background:#166534; border-color:#166534; }
+        .filter-btn.active[data-filter-type="owner"][data-owner="Denise Chmielewski"] { background:#166534; border-color:#166534; }
+        .filter-btn.active[data-filter-type="owner"][data-owner="Dustin Anderson"] { background:#166534; border-color:#166534; }
+        .filter-btn.active[data-filter-type="owner"][data-owner="Ken Sorensen"] { background:#166534; border-color:#166534; }
+        .filter-btn.active[data-filter-type="owner"][data-owner="Ashley Jones"] { background:#166534; border-color:#166534; }
+        .filter-btn.active[data-filter-type="owner"][data-owner="Carrie Ellis"] { background:#166534; border-color:#166534; }
+        .filter-btn.active[data-filter-type="owner"][data-owner="Brooke Jones"] { background:#166534; border-color:#166534; }
+        .filter-btn.active[data-filter-type="owner"][data-owner="Adam Levit"] { background:#166534; border-color:#166534; }
+        .filter-btn.active[data-filter-type="owner"][data-owner="John Salce"] { background:#166534; border-color:#166534; }
+        .filter-btn.active[data-filter-type="owner"][data-owner="N/A"] { background:#166534; border-color:#166534; }
+        .filter-btn.active[data-filter-type="owner"][data-owner="Julie Ann Hackett"] { background:#166534; border-color:#166534; }
+        .filter-btn.active[data-filter-type="owner"][data-owner="Matt Bennett"] { background:#166534; border-color:#166534; }
+        .filter-btn.active[data-filter-type="owner"][data-owner="Haley Saffel"] { background:#166534; border-color:#166534; }
+        .filter-btn.active[data-filter-type="owner"][data-owner="April McHone"] { background:#166534; border-color:#166534; }
+        .filter-btn[data-filter-type="supplier-owner"][data-supplier-owner="Danny Pollak"] { color: #2563eb; }
+        .filter-btn[data-filter-type="supplier-owner"][data-supplier-owner="Erin Bellavance"] { color: #ca8a04; }
+        .filter-btn[data-filter-type="supplier-owner"][data-supplier-owner="Hannah Deupree"] { color: #ca8a04; }
+        .filter-btn[data-filter-type="supplier-owner"][data-supplier-owner="Alyson Colgan"] { color: #db2777; }
+        .filter-btn[data-filter-type="supplier-owner"][data-supplier-owner="Brittany Albert"] { color: #db2777; }
+        .filter-btn[data-filter-type="supplier-owner"][data-supplier-owner="Josh McCutchen"] { color: #ea580c; }
+        .filter-btn.active[data-filter-type="supplier-owner"][data-supplier-owner="Danny Pollak"] { background:#2563eb; border-color:#2563eb; }
+        .filter-btn.active[data-filter-type="supplier-owner"][data-supplier-owner="Erin Bellavance"] { background:#ca8a04; border-color:#ca8a04; }
+        .filter-btn.active[data-filter-type="supplier-owner"][data-supplier-owner="Hannah Deupree"] { background:#ca8a04; border-color:#ca8a04; }
+        .filter-btn.active[data-filter-type="supplier-owner"][data-supplier-owner="Alyson Colgan"] { background:#db2777; border-color:#db2777; }
+        .filter-btn.active[data-filter-type="supplier-owner"][data-supplier-owner="Brittany Albert"] { background:#db2777; border-color:#db2777; }
+        .filter-btn.active[data-filter-type="supplier-owner"][data-supplier-owner="Josh McCutchen"] { background:#ea580c; border-color:#ea580c; }
+        .filter-btn[data-filter-type="supplier-owner"][data-supplier-owner="Janice Greenwald"] { color: #2563eb; }
+        .filter-btn.active[data-filter-type="supplier-owner"][data-supplier-owner="Janice Greenwald"] { background:#2563eb; border-color:#2563eb; }
+        .filter-btn[data-filter-type="supplier-owner"][data-supplier-owner="Jodie Wing"] { color: #ec4899; }
+        .filter-btn.active[data-filter-type="supplier-owner"][data-supplier-owner="Jodie Wing"] { background:#ec4899; border-color:#ec4899; }
+        .filter-btn[data-filter-type="supplier-owner"][data-supplier-owner="Brandon Dvorak"] { color: #ec4899; }
+        .filter-btn.active[data-filter-type="supplier-owner"][data-supplier-owner="Brandon Dvorak"] { background:#ec4899; border-color:#ec4899; }
+        .clear-pill {
+            padding: 6px 14px; border: 2px dashed #ccc; background: white;
+            cursor: pointer; border-radius: 20px; font-size: 12px; color: #888;
+            transition: all 0.2s; font-weight: 500;
+        }
+        .clear-pill:hover { border-color: #999; background: #f5f5f5; color: #555; }
+        .search-export { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; }
+        .search-box {
+            flex: 1; min-width: 220px; padding: 11px 16px;
+            border: 2px solid #e0e0e0; border-radius: 10px; font-size: 15px;
+            background: white; box-shadow: 0 1px 4px rgba(0,0,0,0.05); transition: border-color 0.2s;
+        }
+        .search-box:focus { outline: none; border-color: #2d5a2d; box-shadow: 0 0 0 3px rgba(45,90,45,0.1); }
+        .action-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn-new-task {
+            padding: 10px 20px; background: #2d5a2d; color: white; border: none;
+            border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 700;
+            transition: all 0.2s; box-shadow: 0 2px 8px rgba(45,90,45,0.3);
+        }
+        .btn-new-task:hover { background: #1f4620; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(45,90,45,0.4); }
+        .export-btn { padding: 10px 16px; border: none; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; }
+        .export-btn:hover { transform: translateY(-1px); }
+        .export-view { background: #2563eb; color: white; box-shadow: 0 2px 8px rgba(37,99,235,0.3); }
+        .export-view:hover { background: #1d4ed8; }
+        .export-all { background: #2563eb; color: white; box-shadow: 0 2px 8px rgba(37,99,235,0.3); }
+        .export-all:hover { background: #1d4ed8; }
+        .export-owner { background: #7c3aed; color: white; box-shadow: 0 2px 8px rgba(124,58,237,0.3); }
+        .export-owner:hover { background: #6d28d9; }
+        .table-wrapper {
+            background: white; border-radius: 14px; overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08); border: 1px solid #e8e8e8;
+        }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        thead tr { position: sticky; top: 0; z-index: 10; }
+        th {
+            background: #f7f8fa; padding: 14px 14px; text-align: left;
+            font-weight: 700; font-size: 11px; text-transform: uppercase;
+            color: #555; letter-spacing: 0.6px; border-bottom: 2px solid #e8e8e8; white-space: nowrap;
+        }
+        td { padding: 14px 14px; border-bottom: 1px solid #f0f0f0; font-size: 14.5px; vertical-align: middle; }
+        tbody tr { transition: background 0.15s; }
+        tbody tr:nth-child(even) td { background: #fafbfc; }
+        tbody tr:hover td { background: #f0f7f0 !important; }
+        tbody tr:last-child td { border-bottom: none; }
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 5px 12px; border-radius: 20px; font-size: 12.5px;
+            font-weight: 600; white-space: nowrap;
+        }
+        .status-in-progress { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+        .status-pending { background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; }
+        .status-complete { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+        .task-completed { opacity: 0.55; background: #f3f4f6 !important; }
+        .task-completed td { text-decoration: line-through; color: #9ca3af !important; }
+        .task-completed .status-badge { opacity: 0.7; }
+        .status-on-hold { background: #f9fafb; color: #6b7280; border: 1px solid #d1d5db; }
+        .status-info-update { background: #faf5ff; color: #7c3aed; border: 1px solid #ddd6fe; }
+        .priority-high { color: #dc2626; font-weight: 700; }
+        .priority-medium { color: #d97706; font-weight: 700; }
+        .priority-low { color: #16a34a; font-weight: 700; }
+        .due-date { font-weight: 600; font-size: 13.5px; }
+        .due-date.overdue { color: #dc2626; }
+        .due-date.due-soon-2 { color: #ea580c; }
+        .due-date.due-soon-7 { color: #d97706; }
+        .due-date.due-later { color: #16a34a; }
+        .field-with-dropdown {
+            display: flex; justify-content: space-between; align-items: center; gap: 4px;
+            cursor: pointer; padding: 3px 6px; border-radius: 6px; transition: background-color 0.15s;
+        }
+        .field-with-dropdown:hover { background-color: #f0f0f0; }
+        .dropdown-arrow { font-size: 11px; color: #bbb; }
+        .notes-display { white-space: pre-wrap; word-wrap: break-word; line-height: 1.5; font-size: 13.5px; color: #555; }
+        .client-name { font-weight: 700; font-size: 14px; }
+        .client-name[data-client="World Wide Snacks"] { color: #2563eb; }
+        .client-name[data-client="Sunrise Organics"] { color: #ca8a04; }
+        .client-name[data-client="Cerebelly"] { color: #db2777; }
+        .client-name[data-client="Premier Foods"] { color: #ea580c; }
+        .owner-name { font-weight: 600; color: #166534; }
+        .filter-btn[data-filter-type="owner"] { color: #166534; }
+        .date-picker-input { position: absolute; top: 0; left: 0; padding: 6px 8px; border: 2px solid #2563eb; border-radius: 6px; font-size: 13px; z-index: 100; }
+        .action-icons { display: flex; gap: 6px; align-items: center; }
+        .icon-btn { background: #f5f5f5; border: 1px solid #e0e0e0; cursor: pointer; font-size: 15px; padding: 5px 9px; color: #666; transition: all 0.2s; border-radius: 7px; }
+        .icon-btn:hover { background: #e8e8e8; color: #333; }
+        .dropdown-popup { position: absolute; background: white; border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); z-index: 1001; min-width: 170px; overflow: hidden; }
+        .dropdown-popup-item { padding: 10px 16px; cursor: pointer; font-size: 14px; border-bottom: 1px solid #f5f5f5; transition: background-color 0.15s; }
+        .dropdown-popup-item:last-child { border-bottom: none; }
+        .dropdown-popup-item:hover { background-color: #f0f7f0; }
+        .inline-edit-field { position: relative; cursor: text; }
+        .inline-edit-input { padding: 6px 8px; border: 2px solid #2563eb; border-radius: 6px; font-size: 14px; font-family: inherit; width: 100%; }
+        .edit-input { width:100%; padding:6px 8px; border:1px solid #ddd; border-radius:6px; font-size:13px; font-family:inherit; }
+        .edit-textarea { width:100%; padding:6px 8px; border:1px solid #ddd; border-radius:6px; font-size:13px; font-family:inherit; min-height:40px; resize:vertical; }
+        .edit-actions { display:flex; gap:6px; align-items:center; }
+        .btn-save { padding:6px 12px; background:#16a34a; color:white; border:none; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600; }
+        .btn-save:hover { background:#15803d; }
+        .btn-cancel { padding:6px 12px; background:#ef4444; color:white; border:none; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600; }
+        .btn-cancel:hover { background:#dc2626; }
+        .no-data { text-align: center; padding: 60px 40px; color: #aaa; font-size: 16px; background: white; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border: 1px solid #e8e8e8; }
+        .no-data-icon { font-size: 40px; margin-bottom: 12px; }
+        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.55); z-index:1000; align-items:center; justify-content:center; }
+        .modal.show { display:flex; }
+        .modal-content { background:white; padding:28px; border-radius:14px; max-width:600px; width:90%; max-height:85vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.3); }
+        .modal-header { font-size:19px; font-weight:700; margin-bottom:18px; color:#1a1a1a; }
+        .form-group { margin-bottom:16px; }
+        .form-group label { display:block; font-size:13px; font-weight:600; margin-bottom:5px; color:#444; }
+        .form-group input, .form-group select, .form-group textarea { width:100%; padding:9px 10px; border:2px solid #e0e0e0; border-radius:8px; font-size:14px; font-family:inherit; transition:border-color 0.2s; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline:none; border-color:#2d5a2d; }
+        .form-group textarea { resize:vertical; min-height:100px; }
+        .form-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:24px; }
+        .btn-primary { padding:10px 22px; background:#2d5a2d; color:white; border:none; border-radius:8px; cursor:pointer; font-size:14px; font-weight:700; transition:all 0.2s; }
+        .btn-primary:hover { background:#1f4620; }
+        .btn-secondary { padding:10px 22px; background:#e8e8e8; color:#444; border:none; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; }
+        .btn-secondary:hover { background:#d8d8d8; }
+        .email-preview { background:#f8f9fa; border:1px solid #e0e0e0; padding:16px; border-radius:8px; margin-bottom:16px; white-space:pre-wrap; font-family:'Courier New',monospace; font-size:13px; line-height:1.6; }
+        .export-preview { max-height:400px; overflow-y:auto; border:1px solid #e0e0e0; padding:12px; border-radius:8px; margin-bottom:16px; background:#fafafa; }
+        .export-preview table { width:100%; font-size:12px; box-shadow:none; border-collapse:collapse; }
+        .export-preview th { background:#e8e8e8; padding:8px; font-size:11px; border:1px solid #ccc; }
+        .export-preview td { padding:8px; border:1px solid #ddd; }
+        .owner-email-section { margin-bottom:10px; border:1px solid #e8e8e8; border-radius:10px; padding:14px; background:white; }
+        .owner-email-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid #f0f0f0; cursor:pointer; }
+        .owner-email-header:hover { background-color:#f9f9f9; border-radius:8px; }
+        .owner-name-header { font-weight:700; font-size:15px; }
+        .owner-task-count { font-size:12px; color:#999; background:#f0f0f0; padding:3px 8px; border-radius:10px; }
+        .owner-email-btn { padding:6px 12px; background:#2563eb; color:white; border:none; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600; }
+        .owner-email-btn:hover { background:#1d4ed8; }
+        .owner-tasks-list { padding:10px 0; }
+        .owner-task-row { padding:8px 0; border-bottom:1px solid #f5f5f5; font-size:13px; color:#666; }
+        .owner-task-row:last-child { border-bottom:none; }
+        .task-detail { display:flex; gap:14px; margin-top:4px; }
+        .task-detail-item { flex:1; }
+        .task-detail-label { font-size:11px; color:#aaa; text-transform:uppercase; font-weight:700; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // -- Supabase Cloud Backend -----------------------------------------
+        const _SB_URL = 'https://tmzlytjwfhiciwrnmecy.supabase.co';
+        const _SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRtemx5dGp3ZmhpY2l3cm5tZWN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4ODk0OTMsImV4cCI6MjA5MzQ2NTQ5M30.4FfyCv5YCnxRbI57epWTfbKb_iSRzY9WIKtAH6rkbpI';
+        const sbClient = supabase.createClient(_SB_URL, _SB_KEY);
+        // -------------------------------------------------------------------
+
+        const CLIENTS = ['All Clients', 'World Wide Snacks', 'Sunrise Organics', 'Cerebelly', 'Premier Foods'];
+        const STATUSES = ['In Progress', 'Pending', 'Complete', 'On Hold', 'Info/Update'];
+        const PRIORITIES = ['High', 'Medium', 'Low'];
+        const OWNERS = ['Scott Gilroy', 'Rob Levit', 'Jen Wagoner', 'Denise Chmielewski', 'Dustin Anderson', 'Ken Sorensen', 'Ashley Jones', 'Carrie Ellis', 'Brooke Jones', 'Adam Levit', 'John Salce', 'Julie Ann Hackett', 'Matt Bennett', 'Haley Saffel', 'April McHone', 'Patrice Leannais', 'N/A'];
+        const SUPPLIER_OWNERS = ['Danny Pollak', 'Erin Bellavance', 'Hannah Deupree', 'Alyson Colgan', 'Brittany Albert', 'Josh McCutchen', 'Janice Greenwald', 'Jodie Wing', 'Brandon Dvorak'];
+        const RETAILERS = ['Walmart', 'Target', 'Kroger', 'Costco', 'Whole Foods', 'Amazon', 'Sprouts', 'Publix', 'HEB', 'Wegmans', 'Other'];
+
+        const getSupplierOwnersForClient = (client) => {
+            const map = {
+                'World Wide Snacks': ['Danny Pollak', 'Janice Greenwald', 'N/A'],
+                'Sunrise Organics': ['Erin Bellavance', 'Hannah Deupree', 'Lisa Pounds', 'Lilly Lichtenberger', 'N/A'],
+                'Cerebelly': ['Alyson Colgan', 'Brittany Albert', 'Brandon Dvorak', 'Jodie Wing', 'N/A'],
+                'Premier Foods': ['Josh McCutchen', 'N/A']
+            };
+            return map[client] || [];
+        };
+
+        function TaskManager() {
+            const [tasks, setTasks] = useState([]);
+            const [selectedClient, setSelectedClient] = useState('All Clients');
+            const [selectedStatuses, setSelectedStatuses] = useState([]);
+            const [selectedPriorities, setSelectedPriorities] = useState([]);
+            const [selectedOwners, setSelectedOwners] = useState([]);
+            const [selectedSupplierOwners, setSelectedSupplierOwners] = useState([]);
+            const [selectedRetailers, setSelectedRetailers] = useState([]);
+            const [searchTerm, setSearchTerm] = useState('');
+            const [showModal, setShowModal] = useState(false);
+            const [showEmailModal, setShowEmailModal] = useState(false);
+            const [showExportModal, setShowExportModal] = useState(false);
+            const [exportType, setExportType] = useState('view');
+            const [exportData, setExportData] = useState([]);
+            const [editingField, setEditingField] = useState(null);
+            const [datePickerTaskId, setDatePickerTaskId] = useState(null);
+            const [dropdownPopup, setDropdownPopup] = useState(null);
+            const [emailTask, setEmailTask] = useState(null);
+            const [showEmailByOwner, setShowEmailByOwner] = useState(false);
+            const [expandedOwner, setExpandedOwner] = useState(null);
+            const [editFormData, setEditFormData] = useState({});
+            const [formData, setFormData] = useState({
+                client: '',
+                clientOwner: '',
+                category: '',
+                task: '',
+                owner: '',
+                dueDate: '',
+                status: '',
+                priority: '',
+                notes: '',
+                retailer: formData.retailer,
+                retailer: ''
+            });
+            // Load tasks from Supabase on mount
+            useEffect(() => {
+                const loadTasks = async () => {
+                    try {
+                        const { data, error } = await sbClient
+                            .from('tasks')
+                            .select('*')
+                            .order('created_at', { ascending: true });
+                        if (!error && data && data.length > 0) {
+                            setTasks(data.map(t => ({
+                                id: t.id,
+                                client: t.client || '',
+                                clientOwner: t.clientOwner || '',
+                                category: t.category || '',
+                                task: t.task || '',
+                                owner: t.owner || '',
+                                dueDate: t.dueDate || '',
+                                status: t.status || 'Pending',
+                                priority: t.priority || 'Medium',
+                                notes: t.notes || '',
+                            retailer: t.retailer || ''
+                            })));
+                        }
+                    } catch(e) { console.error('Supabase load error:', e); }
+                };
+                loadTasks();
+            }, []);
+            // Sync tasks to Supabase on every change (debounced)
+            useEffect(() => {
+                if (tasks.length === 0) return;
+                const syncTasks = async () => {
+                    try {
+                        const taskRows = tasks.map(t => ({
+                            id: t.id,
+                            client: t.client || '',
+                            "clientOwner": t.clientOwner || '',
+                            category: t.category || '',
+                            task: t.task || '',
+                            owner: t.owner || '',
+                            "dueDate": t.dueDate || '',
+                            status: t.status || 'Pending',
+                            priority: t.priority || 'Medium',
+                            notes: t.notes || '',
+                            retailer: t.retailer || ''
+                        }));
+                        await sbClient.from('tasks').upsert(taskRows, { onConflict: 'id' });
+                        const currentIds = tasks.map(t => t.id);
+                        if (currentIds.length > 0) {
+                            await sbClient.from('tasks').delete().not('id', 'in', `(${currentIds.join(',')})`);
+                        }
+                    } catch(e) { console.error('Supabase sync error:', e); }
+                };
+                const timer = setTimeout(syncTasks, 800);
+                return () => clearTimeout(timer);
+            }, [tasks]);
+
+            useEffect(() => {
+                const handleClickOutside = (e) => {
+                    if (!e.target.closest('.dropdown-popup') && !e.target.closest('.field-with-dropdown')) {
+                        setDropdownPopup(null);
+                    }
+                };
+                document.addEventListener('click', handleClickOutside);
+                return () => document.removeEventListener('click', handleClickOutside);
+            }, []);
+
+            const filterTasks = () => {
+                return tasks.filter(task => {
+                    const clientMatch = selectedClient === 'All Clients' || task.client === selectedClient;
+                    const statusMatch = selectedStatuses.length === 0 ? task.status !== 'Complete' : selectedStatuses.includes(task.status);
+                    const priorityMatch = selectedPriorities.length === 0 || selectedPriorities.includes(task.priority);
+                    const ownerMatch = selectedOwners.length === 0 || selectedOwners.includes(task.owner);
+                    const supplierOwnerMatch = selectedSupplierOwners.length === 0 ||
+                        getSupplierOwnersForClient(task.client).some(so => selectedSupplierOwners.includes(so));
                     const retailerMatch = selectedRetailers.length === 0 || selectedRetailers.includes(task.retailer);
                     const searchMatch = searchTerm === '' ||
                         task.task.toLowerCase().includes(searchTerm.toLowerCase()) ||
