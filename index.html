@@ -775,6 +775,10 @@ Date: ${today}`;
                 return `priority-${priority.toLowerCase()}`;
             };
 
+            const getRetailerClass = (retailer) => {
+                return retailer ? `retailer-${retailer.toLowerCase().replace(/[\s/]/g, '-')}` : '';
+            };
+
             const getDueDateClass = (dueDate) => {
                 if (!dueDate) return 'due-later';
 
