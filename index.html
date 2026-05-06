@@ -354,7 +354,7 @@
         const PRIORITIES = ['High', 'Medium', 'Low'];
         const OWNERS = ['Scott Gilroy', 'Rob Levit', 'Jen Wagoner', 'Denise Chmielewski', 'Dustin Anderson', 'Ken Sorensen', 'Ashley Jones', 'Carrie Ellis', 'Brooke Jones', 'Adam Levit', 'John Salce', 'Julie Ann Hackett', 'Matt Bennett', 'Haley Saffel', 'April McHone', 'Patrice Leannais', 'N/A'];
         const SUPPLIER_OWNERS = ['Danny Pollak', 'Erin Bellavance', 'Hannah Deupree', 'Alyson Colgan', 'Brittany Albert', 'Josh McCutchen', 'Janice Greenwald', 'Jodie Wing', 'Brandon Dvorak'];
-        const RETAILERS = ['Walmart', 'Target', 'Kroger', 'Costco', 'Whole Foods', 'Amazon', 'Sprouts', 'Publix', 'HEB', 'Wegmans', 'Other'];
+        const RETAILERS = ['Albertsons', 'DECA', 'Food Lion', 'Fresh Thyme', 'Giant Eagle/Market District', 'Giant Foods', 'Golub/Tops', 'Hannaford', 'Harris Teeter', 'HEB', 'Hy-Vee', 'INFRA', 'Ingles', 'Kroger', 'KVAT Food City', 'Lowes/MDI', 'Market Basket', 'Meijer', 'Natural Grocers Vitamin Cottage', 'NCG', 'Publix', "Raley's", "Savemart/Lucky's", 'Schnucks', 'ShopRite', 'Spartan Nash', 'Sprouts', 'Stater Bros', 'Stop & Shop', 'The Fresh Market', 'The Giant Co', 'Walmart', 'Wegmans', 'Weis', 'Whole Foods', 'WinCo'];
 
         const getSupplierOwnersForClient = (client) => {
             const map = {
@@ -1027,23 +1027,113 @@ Date: ${today}`;
                             <table>
                                 <thead>
                                     <tr>
+                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("dueDate")}><span style={{display:'flex',alignItems:'center',color:sortCol==="dueDate"?'#7c3aed':'inherit'}}>Due Date<span style={{fontSize:9,color:sortCol==="dueDate"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="dueDate"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="dueDate"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
+                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("status")}><span style={{display:'flex',alignItems:'center',color:sortCol==="status"?'#7c3aed':'inherit'}}>Status<span style={{fontSize:9,color:sortCol==="status"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="status"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="status"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
                                         <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("client")}><span style={{display:'flex',alignItems:'center',color:sortCol==="client"?'#7c3aed':'inherit'}}>Client<span style={{fontSize:9,color:sortCol==="client"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="client"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="client"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
+                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("priority")}><span style={{display:'flex',alignItems:'center',color:sortCol==="priority"?'#7c3aed':'inherit'}}>Priority<span style={{fontSize:9,color:sortCol==="priority"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="priority"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="priority"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
+                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("retailer")}><span style={{display:'flex',alignItems:'center',color:sortCol==="retailer"?'#7c3aed':'inherit'}}>Retailer<span style={{fontSize:9,color:sortCol==="retailer"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="retailer"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="retailer"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
+                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("owner")}><span style={{display:'flex',alignItems:'center',color:sortCol==="owner"?'#7c3aed':'inherit'}}>VSM Owner<span style={{fontSize:9,color:sortCol==="owner"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="owner"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="owner"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
                                         <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("clientOwner")}><span style={{display:'flex',alignItems:'center',color:sortCol==="clientOwner"?'#7c3aed':'inherit'}}>Client Owner<span style={{fontSize:9,color:sortCol==="clientOwner"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="clientOwner"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="clientOwner"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
                                         <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("category")}><span style={{display:'flex',alignItems:'center',color:sortCol==="category"?'#7c3aed':'inherit'}}>Category<span style={{fontSize:9,color:sortCol==="category"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="category"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="category"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
                                         <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("task")}><span style={{display:'flex',alignItems:'center',color:sortCol==="task"?'#7c3aed':'inherit'}}>Task<span style={{fontSize:9,color:sortCol==="task"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="task"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="task"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
-                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("owner")}><span style={{display:'flex',alignItems:'center',color:sortCol==="owner"?'#7c3aed':'inherit'}}>VSM Owner<span style={{fontSize:9,color:sortCol==="owner"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="owner"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="owner"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
-                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("dueDate")}><span style={{display:'flex',alignItems:'center',color:sortCol==="dueDate"?'#7c3aed':'inherit'}}>Due Date<span style={{fontSize:9,color:sortCol==="dueDate"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="dueDate"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="dueDate"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
-                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("status")}><span style={{display:'flex',alignItems:'center',color:sortCol==="status"?'#7c3aed':'inherit'}}>Status<span style={{fontSize:9,color:sortCol==="status"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="status"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="status"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
-                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("priority")}><span style={{display:'flex',alignItems:'center',color:sortCol==="priority"?'#7c3aed':'inherit'}}>Priority<span style={{fontSize:9,color:sortCol==="priority"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="priority"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="priority"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
                                         <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("notes")}><span style={{display:'flex',alignItems:'center',color:sortCol==="notes"?'#7c3aed':'inherit'}}>Notes<span style={{fontSize:9,color:sortCol==="notes"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="notes"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="notes"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
-                                        <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("retailer")}><span style={{display:'flex',alignItems:'center',color:sortCol==="retailer"?'#7c3aed':'inherit'}}>Retailer<span style={{fontSize:9,color:sortCol==="retailer"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="retailer"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="retailer"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
-                                        <th>Actions</th>
+                                        <th>Actions
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {sortedTasks.map(task => (
                                         <tr key={task.id} className={task.status === 'Complete' ? 'task-completed' : ''}>
+                                            <td className="due-date-cell" onClick={() => setDatePickerTaskId(task.id)}>
+                                                {datePickerTaskId === task.id ? (
+                                                    <input
+                                                        type="date"
+                                                        className="date-picker-input"
+                                                        value={task.dueDate}
+                                                        onChange={(e) => handleUpdateDueDate(task.id, e.target.value)}
+                                                        onBlur={() => setDatePickerTaskId(null)}
+                                                        autoFocus
+                                                    />
+                                                ) : (
+                                                    <span className={`due-date ${getDueDateClass(task.dueDate)}`}>{formatDateWithDay(task.dueDate)}</span>
+                                                )}
+                                            </td>
+                                            <td>
+                                                <div className="field-with-dropdown" onClick={(e) => { e.stopPropagation(); setDropdownPopup({ taskId: task.id, field: 'status' }); }}>
+                                                    <span className={`status-badge ${getStatusClass(task.status)}`}>{task.status}</span>
+                                                    <span className="dropdown-arrow">&#x25BC;</span>
+                                                </div>
+                                                {dropdownPopup?.taskId === task.id && dropdownPopup?.field === 'status' && (
+                                                    <div className="dropdown-popup">
+                                                        {STATUSES.map(status => (
+                                                            <div
+                                                                key={status}
+                                                                className="dropdown-popup-item"
+                                                                onClick={() => handleDropdownSelect(task.id, 'status', status)}
+                                                            >
+                                                                {status}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </td>
                                             <td>{task.client}</td>
+                                            <td>
+                                                <div className="field-with-dropdown" onClick={(e) => { e.stopPropagation(); setDropdownPopup({ taskId: task.id, field: 'priority' }); }}>
+                                                    <span className={getPriorityClass(task.priority)}>{task.priority}</span>
+                                                    <span className="dropdown-arrow">&#x25BC;</span>
+                                                </div>
+                                                {dropdownPopup?.taskId === task.id && dropdownPopup?.field === 'priority' && (
+                                                    <div className="dropdown-popup">
+                                                        {PRIORITIES.map(priority => (
+                                                            <div
+                                                                key={priority}
+                                                                className="dropdown-popup-item"
+                                                                onClick={() => handleDropdownSelect(task.id, 'priority', priority)}
+                                                            >
+                                                                {priority}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td>
+                                                <div className="field-with-dropdown" onClick={(e) => { e.stopPropagation(); setDropdownPopup({ taskId: task.id, field: 'retailer' }); }}>
+                                                    <span className={`retailer-badge ${getRetailerClass(task?.retailer)}`}>{task?.retailer}</span>
+                                                    <span className="dropdown-arrow">&#x25BC;</span>
+                                                </div>
+                                                {dropdownPopup?.taskId === task.id && dropdownPopup?.field === 'retailer' && (
+                                                    <div className="dropdown-popup">
+                                                        {RETAILERS.map(retailer => (
+                                                            <div
+                                                                key={retailer}
+                                                                className="dropdown-popup-item"
+                                                                onClick={() => handleDropdownSelect(task.id, 'retailer', retailer)}
+                                                            >
+                                                                {retailer}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td>
+                                                <div className="field-with-dropdown" onClick={(e) => { e.stopPropagation(); setDropdownPopup({ taskId: task.id, field: 'owner' }); }}>
+                                                    <span className="owner-name" data-owner={task.owner} style={{ color: `#${getColorForValue('owner', task.owner)}` }}>{task.owner}</span>
+                                                    <span className="dropdown-arrow">&#x25BC;</span>
+                                                </div>
+                                                {dropdownPopup?.taskId === task.id && dropdownPopup?.field === 'owner' && (
+                                                    <div className="dropdown-popup">
+                                                        {OWNERS.map(owner => (
+                                                            <div
+                                                                key={owner}
+                                                                className="dropdown-popup-item"
+                                                                onClick={() => handleDropdownSelect(task.id, 'owner', owner)}
+                                                            >
+                                                                {owner}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </td>
                                             <td>
                                                 <div className="field-with-dropdown" onClick={(e) => { e.stopPropagation(); setDropdownPopup({ taskId: task.id, field: 'clientOwner' }); }}>
                                                     <span style={{ color: `#${getColorForValue('supplier-owner', task.clientOwner)}`, fontWeight: '600' }}>{task.clientOwner}</span>
@@ -1099,77 +1189,6 @@ Date: ${today}`;
                                                     task.task
                                                 )}
                                             </td>
-                                            <td>
-                                                <div className="field-with-dropdown" onClick={(e) => { e.stopPropagation(); setDropdownPopup({ taskId: task.id, field: 'owner' }); }}>
-                                                    <span className="owner-name" data-owner={task.owner} style={{ color: `#${getColorForValue('owner', task.owner)}` }}>{task.owner}</span>
-                                                    <span className="dropdown-arrow">&#x25BC;</span>
-                                                </div>
-                                                {dropdownPopup?.taskId === task.id && dropdownPopup?.field === 'owner' && (
-                                                    <div className="dropdown-popup">
-                                                        {OWNERS.map(owner => (
-                                                            <div
-                                                                key={owner}
-                                                                className="dropdown-popup-item"
-                                                                onClick={() => handleDropdownSelect(task.id, 'owner', owner)}
-                                                            >
-                                                                {owner}
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </td>
-                                            <td className="due-date-cell" onClick={() => setDatePickerTaskId(task.id)}>
-                                                {datePickerTaskId === task.id ? (
-                                                    <input
-                                                        type="date"
-                                                        className="date-picker-input"
-                                                        value={task.dueDate}
-                                                        onChange={(e) => handleUpdateDueDate(task.id, e.target.value)}
-                                                        onBlur={() => setDatePickerTaskId(null)}
-                                                        autoFocus
-                                                    />
-                                                ) : (
-                                                    <span className={`due-date ${getDueDateClass(task.dueDate)}`}>{formatDateWithDay(task.dueDate)}</span>
-                                                )}
-                                            </td>
-                                            <td>
-                                                <div className="field-with-dropdown" onClick={(e) => { e.stopPropagation(); setDropdownPopup({ taskId: task.id, field: 'status' }); }}>
-                                                    <span className={`status-badge ${getStatusClass(task.status)}`}>{task.status}</span>
-                                                    <span className="dropdown-arrow">&#x25BC;</span>
-                                                </div>
-                                                {dropdownPopup?.taskId === task.id && dropdownPopup?.field === 'status' && (
-                                                    <div className="dropdown-popup">
-                                                        {STATUSES.map(status => (
-                                                            <div
-                                                                key={status}
-                                                                className="dropdown-popup-item"
-                                                                onClick={() => handleDropdownSelect(task.id, 'status', status)}
-                                                            >
-                                                                {status}
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </td>
-                                            <td>
-                                                <div className="field-with-dropdown" onClick={(e) => { e.stopPropagation(); setDropdownPopup({ taskId: task.id, field: 'priority' }); }}>
-                                                    <span className={getPriorityClass(task.priority)}>{task.priority}</span>
-                                                    <span className="dropdown-arrow">&#x25BC;</span>
-                                                </div>
-                                                {dropdownPopup?.taskId === task.id && dropdownPopup?.field === 'priority' && (
-                                                    <div className="dropdown-popup">
-                                                        {PRIORITIES.map(priority => (
-                                                            <div
-                                                                key={priority}
-                                                                className="dropdown-popup-item"
-                                                                onClick={() => handleDropdownSelect(task.id, 'priority', priority)}
-                                                            >
-                                                                {priority}
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </td>
                                             <td className="inline-edit-field" onClick={() => setEditingField({ taskId: task.id, field: 'notes' })}>
                                                 {editingField?.taskId === task.id && editingField?.field === 'notes' ? (
                                                     <textarea
@@ -1184,26 +1203,6 @@ Date: ${today}`;
                                                     <div className="notes-display">{task.notes}</div>
                                                 )}
                                             </td>
-<td>
-                                                <div className="field-with-dropdown" onClick={(e) => { e.stopPropagation(); setDropdownPopup({ taskId: task.id, field: 'retailer' }); }}>
-                                                    <span className={`retailer-badge ${getRetailerClass(task?.retailer)}`}>{task?.retailer}</span>
-                                                    <span className="dropdown-arrow">&#x25BC;</span>
-                                                </div>
-                                                {dropdownPopup?.taskId === task.id && dropdownPopup?.field === 'retailer' && (
-                                                    <div className="dropdown-popup">
-                                                        {RETAILERS.map(retailer => (
-                                                            <div
-                                                                key={retailer}
-                                                                className="dropdown-popup-item"
-                                                                onClick={() => handleDropdownSelect(task.id, 'retailer', retailer)}
-                                                            >
-                                                                {retailer}
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </td>
-
                                             <td>
                                                 <div className="action-icons">
                                                     <button className="icon-btn" onClick={() => handleEmailTask(task)} title="Email">
