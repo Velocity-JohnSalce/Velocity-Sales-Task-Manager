@@ -852,8 +852,11 @@ Date: ${today}`;
                             ))}
                         </div>
 
-                        <button
-                            <div className="filter-group">
+                        <button className={`client-btn ${showWeeklyCallOnly ? 'active' : ''}`} style={{marginLeft:'12px',background:showWeeklyCallOnly?'#7c3aed':'',borderColor:showWeeklyCallOnly?'#7c3aed':'',color:showWeeklyCallOnly?'white':''}} onClick={() => setShowWeeklyCallOnly(prev => !prev)}>
+                    &#128222; Weekly Call Topics
+                </button>
+            <div className="filters-section">
+                <div className="filter-group">
                                 <div className="filter-label">Status</div>
                                 <div className="filter-options">
                                     {STATUSES.map(status => (
