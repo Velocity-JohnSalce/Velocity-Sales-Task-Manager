@@ -369,7 +369,7 @@
         const PRIORITIES = ['High', 'Medium', 'Low'];
         const OWNERS = ['Scott Gilroy', 'Rob Levit', 'Jen Wagoner', 'Denise Chmielewski', 'Dustin Anderson', 'Ken Sorensen', 'Ashley Jones', 'Carrie Ellis', 'Brooke Jones', 'Adam Levit', 'John Salce', 'Julie Ann Hackett', 'Matt Bennett', 'Haley Saffel', 'April McHone', 'Patrice Leannais', 'N/A'];
         const SUPPLIER_OWNERS = ['Danny Pollak', 'Erin Bellavance', 'Hannah Deupree', 'Alyson Colgan', 'Brittany Albert', 'Josh McCutchen', 'Janice Greenwald', 'Jodie Wing', 'Brandon Dvorak'];
-        const RETAILERS = ['Albertsons', 'DECA', 'Food Lion', 'Fresh Thyme', 'Giant Eagle/Market District', 'Giant Foods', 'Golub/Tops', 'Hannaford', 'Harris Teeter', 'HEB', 'Hy-Vee', 'INFRA', 'Ingles', 'Kroger', 'KVAT Food City', 'Lowes/MDI', 'Market Basket', 'Meijer', 'Natural Grocers Vitamin Cottage', 'NCG', 'Publix', "Raley's", "Savemart/Lucky's", 'Schnucks', 'ShopRite', 'Spartan Nash', 'Sprouts', 'Stater Bros', 'Stop & Shop', 'The Fresh Market', 'The Giant Co', 'Walmart', 'Wegmans', 'Weis', 'Whole Foods', 'WinCo'];
+        const RETAILERS = ['Albertsons', 'Amazon', 'DECA', 'eComm All Other', 'Food Lion', 'Fresh Thyme', 'Giant Eagle/Market District', 'Giant Foods', 'Golub/Tops', 'Hannaford', 'Harris Teeter', 'HEB', 'Hy-Vee', 'iHerb', 'INFRA', 'Ingles', 'Kroger', 'KVAT Food City', 'Lowes/MDI', 'Market Basket', 'Meijer', 'Natural Grocers Vitamin Cottage', 'NCG', 'Publix', "Raley's", "Savemart/Lucky's", 'Schnucks', 'ShopRite', 'Spartan Nash', 'Sprouts', 'Stater Bros', 'Stop & Shop', 'The Fresh Market', 'The Giant Co', 'Thrive', 'Walmart', 'Wegmans', 'Weis', 'Whole Foods', 'WinCo'];
 
         const getSupplierOwnersForClient = (client) => {
             const map = {
@@ -809,7 +809,7 @@ Date: ${today}`;
                 if (daysUntilDue < 0) return 'overdue';
                 if (daysUntilDue <= 2) return 'due-soon-2';
                 if (daysUntilDue <= 7) return 'due-soon-7';
-                return 'due-later';
+                return 'due-later'
             };
 
             const formatDateWithDay = (dateString) => {
