@@ -488,7 +488,7 @@
                     const priorityMatch = selectedPriorities.length === 0 || selectedPriorities.includes(task.priority);
                     const ownerMatch = selectedOwners.length === 0 || selectedOwners.includes(task.owner);
                     const supplierOwnerMatch = selectedSupplierOwners.length === 0 ||
-                        getSupplierOwnersForClient(task.client).some(so => selectedSupplierOwners.includes(so));
+                        selectedSupplierOwners.includes(task.clientOwner);
                     const retailerMatch = selectedRetailers.length === 0 || selectedRetailers.includes(task?.retailer);                const weeklyCallMatch = !showWeeklyCallOnly || task.weeklyCallTopic === true;
                     const searchMatch = searchTerm === '' ||
                         task.task.toLowerCase().includes(searchTerm.toLowerCase()) ||
