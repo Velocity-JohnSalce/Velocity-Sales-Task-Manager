@@ -458,7 +458,7 @@
                             status: t.status || 'Pending',
                             priority: t.priority || 'Medium',
                             notes: t.notes || '',
-                            retailer: t.retailer || '',                        weekly_call_topic: t.weeklyCallTopic || false
+                            weekly_call_topic: t.weeklyCallTopic || false
                         }));
                         await sbClient.from('tasks').upsert(taskRows, { onConflict: 'id' });
                         const currentIds = tasks.map(t => t.id);
