@@ -225,6 +225,12 @@
             transition: all 0.2s; box-shadow: 0 2px 8px rgba(45,90,45,0.3);
         }
         .btn-new-task:hover { background: #1f4620; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(45,90,45,0.4); }
+        .btn-save-tasks { padding: 10px 20px; background: #e07b30; color: white; border: none;
+            border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 700;
+            transition: all 0.2s; box-shadow: 0 2px 8px rgba(224,123,48,0.3); }
+        .btn-save-tasks:hover { background: #c4631a; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(224,123,48,0.4); }
+        .btn-save-tasks.saved { background: #2d5a2d; box-shadow: 0 2px 8px rgba(45,90,45,0.3); }
+        .btn-save-tasks.error { background: #c0392b; box-shadow: 0 2px 8px rgba(192,57,43,0.3); }
         .export-btn { padding: 10px 16px; border: none; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; }
         .export-btn:hover { transform: translateY(-1px); }
         .export-view { background: #2563eb; color: white; box-shadow: 0 2px 8px rgba(37,99,235,0.3); }
@@ -399,6 +405,7 @@
             const [editingField, setEditingField] = useState(null);
             const [datePickerTaskId, setDatePickerTaskId] = useState(null);
             const [dropdownPopup, setDropdownPopup] = useState(null);
+            const [saveStatus, setSaveStatus] = useState('idle'); // 'idle', 'saving', 'saved', 'error'
             const [emailTask, setEmailTask] = useState(null);
             const [showEmailByOwner, setShowEmailByOwner] = useState(false);
             const [expandedOwner, setExpandedOwner] = useState(null);
@@ -435,7 +442,8 @@
                                 status: t.status || 'Pending',
                                 priority: t.priority || 'Medium',
                                 notes: t.notes || '',
-                            retailer: t.retailer || '',                        weeklyCallTopic: t.weekly_call_topic || false
+                                retailer: t.retailer || '',
+                                weeklyCallTopic: t.weekly_call_topic || false
                             })));
                         }
                     } catch(e) { console.error('Supabase load error:', e); }
@@ -458,6 +466,7 @@
                             status: t.status || 'Pending',
                             priority: t.priority || 'Medium',
                             notes: t.notes || '',
+                            retailer: t.retailer || '',
                             weekly_call_topic: t.weeklyCallTopic || false
                         }));
                         await sbClient.from('tasks').upsert(taskRows, { onConflict: 'id' });
@@ -562,6 +571,36 @@
             const handleDropdownSelect = (taskId, field, value) => {
                 setTasks(tasks.map(t => t.id === taskId ? { ...t, [field]: value } : t));
                 setDropdownPopup(null);
+            };
+
+            const handleManualSave = async () => {
+                try {
+                    const taskRows = tasks.map(t => ({
+                        id: t.id,
+                        client: t.client || '',
+                        "clientOwner": t.clientOwner || '',
+                        category: t.category || '',
+                        task: t.task || '',
+                        owner: t.owner || '',
+                        "dueDate": t.dueDate || '',
+                        status: t.status || 'Pending',
+                        priority: t.priority || 'Medium',
+                        notes: t.notes || '',
+                        retailer: t.retailer || '',
+                        weekly_call_topic: t.weeklyCallTopic || false
+                    }));
+                    await sbClient.from('tasks').upsert(taskRows, { onConflict: 'id' });
+                    const currentIds = tasks.map(t => t.id);
+                    if (currentIds.length > 0) {
+                        await sbClient.from('tasks').delete().not('id', 'in', `(${currentIds.join(',')})`);
+                    }
+                    setSaveStatus('saved');
+                    setTimeout(() => setSaveStatus('idle'), 2000);
+                } catch (e) {
+                    console.error('Manual save error:', e);
+                    setSaveStatus('error');
+                    setTimeout(() => setSaveStatus('idle'), 3000);
+                }
             };
 
             const handleDeleteTask = (id) => {
@@ -1021,6 +1060,9 @@ Date: ${today}`;
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                             <div className="action-buttons">
+                                <button className="btn-save-tasks${saveStatus === 'saved' ? ' saved' : saveStatus === 'error' ? ' error' : ''}" onClick={handleManualSave}>
+                                    {saveStatus === 'saved' ? '✓ Saved!' : saveStatus === 'error' ? '✗ Error' : '💾 Save'}
+                                </button>
                                 <button className="btn-new-task" onClick={handleAddTask}>
                                     + New Task
                                 </button>
@@ -1215,7 +1257,7 @@ Date: ${today}`;
                                                 ) : (
                                                     <div className="notes-preview-empty">Click to add note...</div>
                                                 )}
-                                                <div className="notes-expand-hint">✏️ Click to edit</div>
+                                                <div className="notes-expand-hint">âï¸ Click to edit</div>
                                             </td>
                                             <td>
                                                 <div className="weekly-call-cell">                                    <input type="checkbox" className="weekly-call-checkbox" checked={task.weeklyCallTopic || false} onChange={() => handleFieldUpdate(task.id, 'weeklyCallTopic', !task.weeklyCallTopic)} title="Weekly Call Topic" />                                </div>                                </td>                                <td>                                <div className="action-icons">
@@ -1592,7 +1634,7 @@ Date: ${today}`;
                 {notesPopup && (
                     <div style={{display:'flex',position:'fixed',top:0,left:0,width:'100%',height:'100%',background:'rgba(0,0,0,0.45)',zIndex:2000,alignItems:'center',justifyContent:'center'}} onClick={(e) => { if (e.target === e.currentTarget) setNotesPopup(null); }}>
                         <div id="notes-popup-modal">
-                            <h3>📝 Notes</h3>
+                            <h3>ð Notes</h3>
                             {notesPopup.taskLabel && <div id="notes-popup-meta">{notesPopup.taskLabel}</div>}
                             <textarea
                                 id="notes-popup-textarea"
