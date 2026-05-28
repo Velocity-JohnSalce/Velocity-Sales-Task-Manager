@@ -395,7 +395,7 @@ undefined<!DOCTYPE html>
             const [selectedPriorities, setSelectedPriorities] = useState([]);
             const [selectedOwners, setSelectedOwners] = useState([]);
             const [selectedSupplierOwners, setSelectedSupplierOwners] = useState([]);
-            const [selectedRetailers, setSelectedRetailers] = useState([]);                const [showWeeklyCallOnly, setShowWeeklyCallOnly] = useState(false);
+            const [selectedRetailers, setSelectedRetailers] = useState([]);                const [showWeeklyCallOnly, setShowWeeklyCallOnly] = useState(false);                const [showCategoryReviewOnly, setShowCategoryReviewOnly] = useState(false);
             const [searchTerm, setSearchTerm] = useState('');
             const [showModal, setShowModal] = useState(false);
             const [notesPopup, setNotesPopup] = useState(null);
@@ -421,7 +421,7 @@ undefined<!DOCTYPE html>
                 status: '',
                 priority: '',
                 notes: '',
-                retailer: '',            weeklyCallTopic: false
+                retailer: '',            weeklyCallTopic: false,            categoryReview: false
             });
             // Load tasks from Supabase on mount
             useEffect(() => {
@@ -444,7 +444,8 @@ undefined<!DOCTYPE html>
                                 priority: t.priority || 'Medium',
                                 notes: t.notes || '',
                                 retailer: t.retailer || '',
-                                weeklyCallTopic: t.weekly_call_topic || false
+                                weeklyCallTopic: t.weekly_call_topic || false,
+                                categoryReview: t.category_review || false
                             })));
                         }
                     } catch(e) { console.error('Supabase load error:', e); }
@@ -468,7 +469,8 @@ undefined<!DOCTYPE html>
                             priority: t.priority || 'Medium',
                             notes: t.notes || '',
                             retailer: t.retailer || '',
-                            weekly_call_topic: t.weeklyCallTopic || false
+                            weekly_call_topic: t.weeklyCallTopic || false,
+                            category_review: t.categoryReview || false
                         }));
                         await sbClient.from('tasks').upsert(taskRows, { onConflict: 'id' });
                         const currentIds = tasks.map(t => t.id);
@@ -499,13 +501,13 @@ undefined<!DOCTYPE html>
                     const ownerMatch = selectedOwners.length === 0 || selectedOwners.includes(task.owner);
                     const supplierOwnerMatch = selectedSupplierOwners.length === 0 ||
                         selectedSupplierOwners.includes(task.clientOwner);
-                    const retailerMatch = selectedRetailers.length === 0 || selectedRetailers.includes(task?.retailer);                const weeklyCallMatch = !showWeeklyCallOnly || task.weeklyCallTopic === true;
+                    const retailerMatch = selectedRetailers.length === 0 || selectedRetailers.includes(task?.retailer);                const weeklyCallMatch = !showWeeklyCallOnly || task.weeklyCallTopic === true;                const categoryReviewMatch = !showCategoryReviewOnly || task.categoryReview === true || task.category === 'Reviews';
                     const searchMatch = searchTerm === '' ||
                         task.task.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         task.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         task.notes.toLowerCase().includes(searchTerm.toLowerCase());
 
-                    return clientMatch && statusMatch && priorityMatch && ownerMatch && supplierOwnerMatch && retailerMatch && weeklyCallMatch && searchMatch;
+                    return clientMatch && statusMatch && priorityMatch && ownerMatch && supplierOwnerMatch && retailerMatch && weeklyCallMatch && categoryReviewMatch && searchMatch;
                 });
             };
 
@@ -554,7 +556,7 @@ undefined<!DOCTYPE html>
                     status: '',
                     priority: '',
                     notes: '',
-                retailer: '',            weeklyCallTopic: false
+                retailer: '',            weeklyCallTopic: false,            categoryReview: false
                 });
                 setShowModal(true);
             };
@@ -588,7 +590,8 @@ undefined<!DOCTYPE html>
                         priority: t.priority || 'Medium',
                         notes: t.notes || '',
                         retailer: t.retailer || '',
-                        weekly_call_topic: t.weeklyCallTopic || false
+                        weekly_call_topic: t.weeklyCallTopic || false,
+                        category_review: t.categoryReview || false
                     }));
                     await sbClient.from('tasks').upsert(taskRows, { onConflict: 'id' });
                     const currentIds = tasks.map(t => t.id);
@@ -896,6 +899,9 @@ Date: ${today}`;
                         <button className={`client-btn ${showWeeklyCallOnly ? 'active' : ''}`} style={{marginLeft:'12px',background:showWeeklyCallOnly?'#7c3aed':'',borderColor:showWeeklyCallOnly?'#7c3aed':'',color:showWeeklyCallOnly?'white':''}} onClick={() => setShowWeeklyCallOnly(prev => !prev)}>
                     &#128222; Weekly Call Topics
                 </button>
+                <button className={`client-btn ${showCategoryReviewOnly ? 'active' : ''}`} style={{marginLeft:'8px',background:showCategoryReviewOnly?'#16a34a':'',borderColor:showCategoryReviewOnly?'#16a34a':'',color:showCategoryReviewOnly?'white':''}} onClick={() => setShowCategoryReviewOnly(prev => !prev)}>
+                    &#128203; Category Reviews
+                </button>
             <div className="filters-section">
                 <div className="filter-group">
                                 <div className="filter-label">Status</div>
@@ -1100,7 +1106,7 @@ Date: ${today}`;
                                         <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("category")}><span style={{display:'flex',alignItems:'center',color:sortCol==="category"?'#7c3aed':'inherit'}}>Category<span style={{fontSize:9,color:sortCol==="category"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="category"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="category"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
                                         <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("task")}><span style={{display:'flex',alignItems:'center',color:sortCol==="task"?'#7c3aed':'inherit'}}>Task<span style={{fontSize:9,color:sortCol==="task"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="task"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="task"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
                                         <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => handleSort("notes")}><span style={{display:'flex',alignItems:'center',color:sortCol==="notes"?'#7c3aed':'inherit'}}>Notes<span style={{fontSize:9,color:sortCol==="notes"?'#7c3aed':'#bbb',display:'flex',flexDirection:'column',lineHeight:1,marginLeft:4}}><span style={{opacity:sortCol==="notes"&&sortDir==='asc'?1:0.25}}>&#x25B2;</span><span style={{opacity:sortCol==="notes"&&sortDir==='desc'?1:0.25}}>&#x25BC;</span></span></span></th>
-                                        <th style={{textAlign:'center',whiteSpace:'nowrap'}}>Weekly Call</th><th>Actions</th>
+                                        <th style={{textAlign:'center',whiteSpace:'nowrap'}}>Weekly Call</th><th style={{textAlign:'center',whiteSpace:'nowrap'}}>Cat. Review</th><th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1261,7 +1267,7 @@ Date: ${today}`;
                                                 <div className="notes-expand-hint">✏️ Click to edit</div>
                                             </td>
                                             <td>
-                                                <div className="weekly-call-cell">                                    <input type="checkbox" className="weekly-call-checkbox" checked={task.weeklyCallTopic || false} onChange={() => handleFieldUpdate(task.id, 'weeklyCallTopic', !task.weeklyCallTopic)} title="Weekly Call Topic" />                                </div>                                </td>                                <td>                                <div className="action-icons">
+                                                <div className="weekly-call-cell">                                    <input type="checkbox" className="weekly-call-checkbox" checked={task.weeklyCallTopic || false} onChange={() => handleFieldUpdate(task.id, 'weeklyCallTopic', !task.weeklyCallTopic)} title="Weekly Call Topic" />                                </div>                                </td>                                <td style={{textAlign:'center',verticalAlign:'middle'}}>                                <input type="checkbox" className="category-review-checkbox" style={{width:'16px',height:'16px',cursor:'pointer',accentColor:'#16a34a'}} checked={task.categoryReview || false} onChange={() => handleFieldUpdate(task.id, 'categoryReview', !task.categoryReview)} title="Category Review" />                                </td>                                <td>                                <div className="action-icons">
                                                     <button className="icon-btn" onClick={() => handleEmailTask(task)} title="Email">
                                                         &#x2709;&#xFE0F;
                                                     </button>
@@ -1397,6 +1403,28 @@ Date: ${today}`;
                                         <option key={retailer} value={retailer}>{retailer}</option>
                                     ))}
                                 </select>
+                            </div>
+                            <div className="form-group">
+                                <label style={{display:'flex',alignItems:'center',gap:'10px',cursor:'pointer'}}>
+                                    <input
+                                        type="checkbox"
+                                        checked={formData.weeklyCallTopic || false}
+                                        onChange={(e) => setFormData(prev => ({...prev, weeklyCallTopic: e.target.checked}))}
+                                        style={{width:'18px',height:'18px',accentColor:'#7c3aed',cursor:'pointer'}}
+                                    />
+                                    <span>&#128222; Weekly Call Topic</span>
+                                </label>
+                            </div>
+                            <div className="form-group">
+                                <label style={{display:'flex',alignItems:'center',gap:'10px',cursor:'pointer'}}>
+                                    <input
+                                        type="checkbox"
+                                        checked={formData.categoryReview || false}
+                                        onChange={(e) => setFormData(prev => ({...prev, categoryReview: e.target.checked}))}
+                                        style={{width:'18px',height:'18px',accentColor:'#16a34a',cursor:'pointer'}}
+                                    />
+                                    <span>&#128203; Category Review</span>
+                                </label>
                             </div>
                             <div className="form-actions">
                                 <button className="btn-secondary" onClick={() => setShowModal(false)}>
